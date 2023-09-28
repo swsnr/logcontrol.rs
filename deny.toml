@@ -1,0 +1,27 @@
+# We only care for Linux: Logcontrol is a systemd thing, and systemd is for Linux.
+targets = [{ triple = "x86_64-unknown-linux-gnu" }]
+
+[advisories]
+db-path = "~/.cargo/advisory-db"
+db-urls = ["https://github.com/rustsec/advisory-db"]
+vulnerability = "deny"
+unmaintained = "deny"
+yanked = "deny"
+notice = "warn"
+
+[licenses]
+unlicensed = "deny"
+allow = ["MIT", "Apache-2.0"]
+exceptions = [{ allow = ["Unicode-DFS-2016"], name = "unicode-ident" }]
+# Deny all copyleft license except the ones above.
+copyleft = "deny"
+allow-osi-fsf-free = "neither"
+default = "deny"
+confidence-threshold = 0.8
+
+[sources]
+unknown-registry = "deny"
+unknown-git = "deny"
+
+[bans]
+multiple-versions = "deny"

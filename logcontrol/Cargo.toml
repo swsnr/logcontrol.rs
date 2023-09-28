@@ -1,0 +1,17 @@
+[package]
+name = "logcontrol"
+version = "0.1.0"
+description = "Abstract types for the systemd logcontrol interface"
+readme = "README.md"
+authors = ["Sebastian Wiesner <sebastian@swsnr.de>"]
+keywords = ["systemd", "log"]
+
+homepage.workspace = true
+repository.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+categories.workspace = true
+
+[dependencies]
+thiserror = "1.0.49"

@@ -1,0 +1,10 @@
+[workspace]
+members = ["logcontrol"]
+
+[workspace.package]
+homepage = "https://github.com/swsnr/logcontrol.rs"
+repository = "https://github.com/swsnr/logcontrol.rs.git"
+edition = "2021"
+rust-version = "1.71"
+license = "MIT OR Apache-2.0"
+categories = ["debugging"]

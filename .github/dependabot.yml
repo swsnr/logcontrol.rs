@@ -1,0 +1,8 @@
+version: 2
+updates:
+  # Check for updates of crates and actions every month.  We don't check for
+  # cargo updates because it's a nuisnace, and cargo update exists.
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: monthly
