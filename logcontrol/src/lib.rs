@@ -258,3 +258,24 @@ pub static DBUS_OBJ_PATH: &str = "/org/freedesktop/LogControl1";
 pub fn stderr_connected_to_journal() -> bool {
     todo!()
 }
+
+/// Determine the syslog identifier for this process.
+///
+/// This function obtains the syslog identifier from the file name of the
+/// current executable, per [`std::env::current_exe`].
+///
+/// As such, it's a comparatively expensive function to call; implementations of
+/// [`LogControl1`] should avoid calling it for every invocation, but instead
+/// determine the identifier once upon construction and store it.
+///
+/// If it fails to determine the syslog identifier, i.e. when `current_exe`
+/// returns an error, this function falls back to the empty string.
+pub fn syslog_identifier() -> String {
+    std::env::current_exe()
+        .ok()
+        .as_ref()
+        .and_then(|p| p.file_name())
+        .map(|n| n.to_string_lossy().into_owned())
+        // If we fail to get the name of the current executable fall back to an empty string.
+        .unwrap_or_else(String::new)
+}
