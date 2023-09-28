@@ -5,6 +5,8 @@
 #![deny(warnings, clippy::all, missing_docs, missing_debug_implementations)]
 #![forbid(unsafe_code)]
 
+use std::fmt::{Display, Formatter};
+
 use thiserror::Error;
 
 /// A syslog log level as used by the systemd log control interface.
@@ -54,5 +56,21 @@ impl TryFrom<&str> for LogLevel {
             "debug" => Ok(LogLevel::Debug),
             _ => Err(LogLevelParseError::InvalidLogLevel),
         }
+    }
+}
+
+impl Display for LogLevel {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+        let level = match self {
+            LogLevel::Emerg => "emerg",
+            LogLevel::Alert => "alert",
+            LogLevel::Crit => "crit",
+            LogLevel::Err => "err",
+            LogLevel::Warning => "warning",
+            LogLevel::Notice => "notice",
+            LogLevel::Info => "info",
+            LogLevel::Debug => "debug",
+        };
+        write!(f, "{level}")
     }
 }
