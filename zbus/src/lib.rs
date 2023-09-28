@@ -4,15 +4,24 @@
 //!  underlying [`logcontrol::LogControl1`] as sole argument and exposes it
 //! over DBus, as a standard zbus DBus interface:
 //!
-//! ```
-//! let _conn = ConnectionBuilder::session()?
-//!     .name("com.example.ServiceWhichLogs")?
-//!     .serve_at(
-//!         logcontrol::DBUS_OBJ_PATH,
-//!         logcontrol_zbus::LogControl1::new(control),
-//!     )?
-//!     .build()
-//!     .await?;
+//! ```ignore
+//! #[async_std::main]
+//! async fn main() -> Result<(), Box<dyn std::error::Error>> {
+//!     let control = todo!();
+//!     let _conn = zbus::ConnectionBuilder::session()?
+//!         .name("de.swsnr.logcontrol.SimpleServerExample")?
+//!         .serve_at(
+//!             logcontrol::DBUS_OBJ_PATH,
+//!             logcontrol_zbus::LogControl1::new(control),
+//!         )?
+//!         .build()
+//!         .await?;
+//!
+//!     // Do other things or go to wait forever
+//!     std::future::pending::<()>().await;
+//!
+//!     Ok(())
+//! }
 //! ```
 //!
 //! Note that for `systemctl` to find the log control interface with

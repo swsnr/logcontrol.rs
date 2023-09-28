@@ -1,7 +1,82 @@
 //! Types for systemd's [logcontrol] interface.
 //!
-//! See [`LogControl1`] for the main trait to use (in case you're writing a DBus frontend), or to implement (in case
-//! you're integrating a logging framework).
+//! ## The log control interface
+//!
+//! The log control interface exposes the basic log settings of a service over a
+//! specified DBus interface under a fixed DBus object path.  If a systemd
+//! service then defines a fixed DBus name in its unit file, via the `BusName`
+//! property in the `Service` section, `systemctl` can query and update the
+//! logging settings over DBus.
+//!
+//! For instance, `systemd-resolved.service` specifies a bus name in its unit
+//! file:
+//!
+//! ```ini
+//! BusName=org.freedesktop.resolve1
+//! ```
+//!
+//! It also exports the log control interface:
+//!
+//! ```console
+//! $ busctl tree org.freedesktop.resolve1
+//! └─ /org
+//!   └─ /org/freedesktop
+//!     ├─ /org/freedesktop/LogControl1
+//!     […]
+//! ```
+//!
+//! Hence, we can use `systemctl` to query the log level of the service and
+//! change it at runtime, e.g. to enable verbose debugging logging for the
+//! running service instance:
+//!
+//! ```console
+//! # systemctl service-log-level systemd-resolved.service
+//! info
+//! # systemctl service-log-level systemd-resolved.service debug
+//! # systemctl service-log-level systemd-resolved.service
+//! debug
+//! ```
+//!
+//! This crate provides abstract types to implement and expose this interface.
+//!
+//! ## Provided types and utilities
+//!
+//! The [`LogControl1`] trait implements abstract log control interface in Rust.
+//! To add support for a logging framework you need to implement this trait
+//! around a `struct` which can dynamically adapt the logging output as well as
+//! the logging level.
+//!
+//! To expose an implementation of the log control interface use the methods of
+//! the [`LogControl1`] trait to call the corresponding log control methods in
+//! the DBus callbacks.
+//!
+//! In addition to this core trait and related types, this crate also provides
+//! some concrete helper functions to implement aspects of the log control
+//! interface.
+//!
+//! [`DBUS_OBJ_PATH`] provides a constant for the DBUs object path the interface
+//! must be served at according to the interface specification, in order to be
+//! found by `systemdctl`.
+//!
+//! [`stderr_connected_to_journal`] determines whether the current process has
+//! its stderr directly connected to the systemd journal (as for all processes
+//! directly started via systemd units); in this case a log control implementation
+//! should default to logging to the [`LogTarget::Journal`] log target.
+//!
+//! ## Logging framework implementations and DBus frontends
+//!
+//! The following crates provides implementations of the [`LogControl1`] trait
+//! for a certain logging framework:
+//!
+//! - [`logcontrol-tracing`](https://docs.rs/logcontrol-tracing) implements
+//!   the log control interface on top of the [`tracing`](https://doc.rs/tracing)
+//!   crate.
+//!
+//! These crates implement DBus frontends to actually expose an implementation
+//! of the [`LogControl1`] trait over DBus:
+//!
+//! - [`logcontrol-zbus`](https://docs.rs/logcontrol-zbus) glues a [`LogControl1`]
+//!   into the pure Rust DBus implementation [`zbus`](https://docs.rs/zbus).
 //!
 //! [logcontrol]: https://www.freedesktop.org/software/systemd/man/org.freedesktop.LogControl1.html
 
@@ -180,8 +255,6 @@ pub trait LogControl1 {
 pub static DBUS_OBJ_PATH: &str = "/org/freedesktop/LogControl1";
 
 /// Whether the current process is directly connected to the systemd journal.
-///
-/// Use this function to select an appropriate target for [`LogTarget::Auto`].
 pub fn stderr_connected_to_journal() -> bool {
     todo!()
 }

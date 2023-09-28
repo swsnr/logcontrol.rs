@@ -1,6 +1,37 @@
 //! A [`LogControl1`] implementation for [`tracing`].
 //!
-//! See [`TracingLogControl1`] for the main implementation.
+//! [`TracingLogControl1`] provides a [`LogControl1`] implementation on top of
+//! tracing, which uses the [reload layer][tracing_subscriber::reload] to
+//! dyanmically switch layers and level filters when the log target or log level
+//! are changed over the log control interfaces.
+//!
+//! It uses a [`LogControl1LayerFactory`] implementation to create the log target
+//! layers each time the log target is changed.  This crates provides a default
+//! [`PrettyLogControl1LayerFactory`] which uses the pretty format of
+//! [`tracing_subscriber`] on stdout for the console target and
+//! [`tracing_journald`] for the Journal target.  You can provide your own
+//! implementation to customize the layer for each target.
+//!
+//! When created [`TracingLogControl1`] additionally returns a layer which needs
+//! to be added to the global tracing subscriber, i.e. a [`tracing_subscriber::Registry`],
+//! for log control to have any effect.
+//!
+//! ```rust
+//! use logcontrol::*;
+//! use logcontrol_tracing::*;
+//! use tracing_subscriber::prelude::*;
+//!
+//! let (control, layer) = TracingLogControl1::new(
+//!     PrettyLogControl1LayerFactory,
+//!     "syslog_identifier".to_string(),
+//!     LogTarget::Console,
+//!     LogLevel::Info,
+//! ).unwrap();
+//!
+//! let subscriber = tracing_subscriber::Registry::default().with(layer);
+//! tracing::subscriber::set_global_default(subscriber).unwrap();
+//! // Then register `control` over DBus, e.g. via `logcontrol_zbus::LogControl1`.
+//! ```
 
 #![deny(warnings, clippy::all, missing_docs)]
 #![forbid(unsafe_code)]
@@ -84,7 +115,14 @@ pub trait LogControl1LayerFactory {
     ) -> Result<Self::ConsoleLayer<S>, LogControl1Error>;
 }
 
-struct PrettyLogControl1LayerFactory;
+/// A layer factory which uses pretty printing on stdout for the console target.
+///
+/// For [`LogTarget::Console`] this layer factory creates a [`mod@tracing_subscriber::fmt`]
+/// layer which logs to stdout with the built-in pretty format.
+///
+/// For [`LogTarget::Journal`] this layer factory creates a [`tracing_journald`]
+/// layer without field prefixes and no further customization.
+pub struct PrettyLogControl1LayerFactory;
 
 impl LogControl1LayerFactory for PrettyLogControl1LayerFactory {
     type JournalLayer<S: Subscriber + for<'span> LookupSpan<'span>> = tracing_journald::Layer;
@@ -168,8 +206,9 @@ where
 {
     /// Create a new [`LogControl1`] layer.
     ///
-    /// `factory` creates the [`tracing::Layer`] for the selected `target` which denotes the initial log target.
-    /// The `factory` is invoked whenever the log target is changed, to create a new layer to use for the selected log
+    /// `factory` creates the [`tracing_subscriber::Layer`] for the selected `target`
+    /// which denotes the initial log target. The `factory` is invoked whenever the
+    /// log target is changed, to create a new layer to use for the selected log
     /// target.
     ///
     /// `level` likewise denotes the default log level to start with.
@@ -179,8 +218,8 @@ where
     pub fn new(
         factory: F,
         syslog_identifier: String,
-        level: LogLevel,
         target: LogTarget,
+        level: LogLevel,
     ) -> Result<(Self, LogControl1Layer<F, S>), LogControl1Error> {
         let tracing_target = target.try_into()?;
         let tracing_level = from_log_level(level)?;
