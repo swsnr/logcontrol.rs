@@ -1,6 +1,6 @@
 //! Types for systemd's [logcontrol] interface.
 //!
-//! [logcontrol]: https://www.freedesktop.org/software/systemd/man/org.freedesktop.LogControl1.html#
+//! [logcontrol]: https://www.freedesktop.org/software/systemd/man/org.freedesktop.LogControl1.html
 
 #![deny(warnings, clippy::all, missing_docs, missing_debug_implementations)]
 #![forbid(unsafe_code)]
@@ -75,30 +75,25 @@ impl Display for LogLevel {
 /// Log targets used by the systemd log control interface.
 #[derive(Debug, Copy, Clone, PartialEq, Eq)]
 pub enum LogTarget {
-    /// The regular console, i.e. stdout or stderr.
+    /// Log to the console or standard output.
     Console,
     /// The kernel ring message buffer.
     ///
     /// Normally not used by userspace services.
     Kmsg,
-    /// The direct interface to the systemd journal.
+    /// Log to the journal natively.
     ///
-    /// Prefer this over `Syslog`, and over console logging,
-    /// if the process runs under systemd, because this interface
-    /// retains all structured data.
+    /// Prefer this other log targets when running under systemd,
+    /// because this log target retains all structured data.
+    ///
+    /// See [`stderr_connected_to_journal`] to determine whether the current
+    /// process is already connected to the journal (i.e. its stderr goes
+    /// directly into the systemd journal).
     Journal,
     /// The legacy syslog interface.
     ///
     /// Services which use systemd should prefer the `Journal` interface.
     Syslog,
-    /// Disable all logging.
-    Null,
-    /// Automatically log to console or journal.
-    ///
-    /// If the stdout or stderr streams of the current process are
-    /// connected to the systemd journal this is equivalent to `Journal`.
-    /// Otherwise it's `Console`.
-    Auto,
 }
 
 /// The log target was invalid.
@@ -115,8 +110,6 @@ impl TryFrom<&str> for LogTarget {
             "kmsg" => Ok(LogTarget::Kmsg),
             "journal" => Ok(LogTarget::Journal),
             "syslog" => Ok(LogTarget::Syslog),
-            "null" => Ok(LogTarget::Null),
-            "auto" => Ok(LogTarget::Auto),
             _ => Err(LogTargetParseError),
         }
     }
@@ -129,9 +122,14 @@ impl Display for LogTarget {
             LogTarget::Kmsg => "kmsg",
             LogTarget::Journal => "journal",
             LogTarget::Syslog => "syslog",
-            LogTarget::Null => "null",
-            LogTarget::Auto => "auto",
         };
         write!(f, "{target}")
     }
+}
+
+/// Whether the current process is directly connected to the systemd journal.
+///
+/// Use this function to select an appropriate target for [`LogTarget::Auto`].
+pub fn stderr_connected_to_journal() -> bool {
+    todo!()
 }
