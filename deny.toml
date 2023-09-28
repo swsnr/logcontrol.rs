@@ -25,3 +25,8 @@ unknown-git = "deny"
 
 [bans]
 multiple-versions = "deny"
+skip = [
+    # tracing-subscriber depends on these older versions too, in some paths
+    { name = "regex-automata", version = "0.1.10" },
+    { name = "regex-syntax", version = "0.6.29" },
+]

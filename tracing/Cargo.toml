@@ -1,0 +1,24 @@
+[package]
+name = "logcontrol-tracing"
+version = "0.1.0"
+description = "Tracing backend for the log control interface"
+readme = "README.md"
+authors = ["Sebastian Wiesner <sebastian@swsnr.de>"]
+keywords = ["systemd", "log", "tracing"]
+
+homepage.workspace = true
+repository.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+categories.workspace = true
+
+[dependencies]
+tracing = { version = "0.1.37", default-features = false, features = ["attributes"] }
+tracing-journald = { version = "0.3.0", default-features = false }
+tracing-subscriber = { version = "0.3.17", default-features = false, features = ["env-filter"] }
+logcontrol = { version = "0.1.0", path = "../logcontrol" }
+
+[dev-dependencies]
+static_assertions = "1.1.0"
+tracing-subscriber = { version = "0.3.17", default-features = false, features = ["ansi", "json"] }
