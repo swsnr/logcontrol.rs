@@ -13,7 +13,7 @@ use thiserror::Error;
 ///
 /// See [POSIX syslog](https://pubs.opengroup.org/onlinepubs/9699919799.2018edition/functions/syslog.html)
 /// or `syslog(3)` for more information.
-#[derive(Debug, Copy, Clone)]
+#[derive(Debug, Copy, Clone, PartialEq, Eq)]
 pub enum LogLevel {
     /// A panic condition; system is unusable.
     Emerg,
@@ -33,13 +33,10 @@ pub enum LogLevel {
     Debug,
 }
 
-/// Errors w
+/// The log level was invalid.
 #[derive(Debug, Copy, Clone, Error)]
-pub enum LogLevelParseError {
-    /// The log level was not valid.
-    #[error("Invalid log level")]
-    InvalidLogLevel,
-}
+#[error("Invalid log level")]
+pub struct LogLevelParseError;
 
 impl TryFrom<&str> for LogLevel {
     type Error = LogLevelParseError;
@@ -54,7 +51,7 @@ impl TryFrom<&str> for LogLevel {
             "notice" => Ok(LogLevel::Notice),
             "info" => Ok(LogLevel::Info),
             "debug" => Ok(LogLevel::Debug),
-            _ => Err(LogLevelParseError::InvalidLogLevel),
+            _ => Err(LogLevelParseError),
         }
     }
 }
