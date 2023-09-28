@@ -1,5 +1,8 @@
 //! Types for systemd's [logcontrol] interface.
 //!
+//! See [`LogControl1`] for the main trait to use (in case you're writing a DBus frontend), or to implement (in case
+//! you're integrating a logging framework).
+//!
 //! [logcontrol]: https://www.freedesktop.org/software/systemd/man/org.freedesktop.LogControl1.html
 
 #![deny(warnings, clippy::all, missing_docs, missing_debug_implementations)]
@@ -125,6 +128,50 @@ impl Display for LogTarget {
         };
         write!(f, "{target}")
     }
+}
+
+/// An error in a [`LogControl1`] operation.
+#[derive(Debug, Error)]
+pub enum LogControl1Error {
+    /// A log level is not supported by the underlying log framework.
+    #[error("The log level {0} is not supported")]
+    UnsupportedLogLevel(LogLevel),
+    /// A log target is not supported by the underlying log framework.
+    #[error("The log target {0} is not supported")]
+    UnsupportedLogTarget(LogTarget),
+    /// An IO error occurred while changing log target or log level.
+    #[error(transparent)]
+    InputOutputError(#[from] std::io::Error),
+    /// A generic failure while changing log target or log level.
+    #[error("{0}")]
+    Failure(String),
+}
+
+/// Abstract representation of the [LogControl1] interface.
+///
+/// Bridges a DBus frontend to a backend logging framework.
+///
+/// Implementations should choose the initial log target automatically, according
+/// to whether their stderr is already connected to the systemd journal directly,
+/// per `$JOURNAL_STREAM` (see [`systemd.exec(5)](https://www.freedesktop.org/software/systemd/man/systemd.exec.html)).
+/// [`stderr_connected_to_journal`] implements this check.
+///
+/// [LogControl1]: https://www.freedesktop.org/software/systemd/man/org.freedesktop.LogControl1.html
+pub trait LogControl1 {
+    /// Get the currently configured log level.
+    fn level(&self) -> LogLevel;
+
+    /// Set the level of the underlying log framework.
+    fn set_level(&mut self, level: LogLevel) -> Result<(), LogControl1Error>;
+
+    /// Get the currently configured log target.
+    fn target(&self) -> LogTarget;
+
+    /// Set the target of the underlying log framework.
+    fn set_target(&mut self, target: LogTarget) -> Result<(), LogControl1Error>;
+
+    /// Get the syslog identifier.
+    fn syslog_identifier(&self) -> &str;
 }
 
 /// Whether the current process is directly connected to the systemd journal.
