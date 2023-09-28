@@ -1,0 +1,77 @@
+//! A simple zbus server which exposes the log control interface.
+//!
+//! Run as an ad-hoc service via
+//!
+//! ```
+//! $ systemd-run --user --pty \
+//!     --service-type=dbus --unit=log-control-example.service \
+//!     --property=BusName=de.swsnr.logcontrol.SimpleServerExample \
+//!     ./target/debug/examples/simple-server
+//! ```
+//!
+//! Then use `systemctl --user service-log-level log-control-example.service`
+//! or `systemctl --user service-log-target log-control-example.service` to test
+//! the interface.
+
+use std::{error::Error, future::pending};
+
+use logcontrol::LogControl1;
+use zbus::ConnectionBuilder;
+
+struct DummyLogControl {
+    level: logcontrol::LogLevel,
+    target: logcontrol::LogTarget,
+}
+
+impl LogControl1 for DummyLogControl {
+    fn level(&self) -> logcontrol::LogLevel {
+        self.level
+    }
+
+    fn set_level(
+        &mut self,
+        level: logcontrol::LogLevel,
+    ) -> Result<(), logcontrol::LogControl1Error> {
+        eprintln!("Setting level to {level}");
+        self.level = level;
+        Ok(())
+    }
+
+    fn target(&self) -> logcontrol::LogTarget {
+        self.target
+    }
+
+    fn set_target(
+        &mut self,
+        target: logcontrol::LogTarget,
+    ) -> Result<(), logcontrol::LogControl1Error> {
+        eprintln!("Setting target to {target}");
+        self.target = target;
+        Ok(())
+    }
+
+    fn syslog_identifier(&self) -> &str {
+        "foo"
+    }
+}
+
+#[async_std::main]
+async fn main() -> Result<(), Box<dyn Error>> {
+    let control = DummyLogControl {
+        level: logcontrol::LogLevel::Info,
+        target: logcontrol::LogTarget::Console,
+    };
+    let _conn = ConnectionBuilder::session()?
+        .name("de.swsnr.logcontrol.SimpleServerExample")?
+        .serve_at(
+            logcontrol::DBUS_OBJ_PATH,
+            logcontrol_zbus::LogControl1::new(control),
+        )?
+        .build()
+        .await?;
+
+    // Do other things or go to wait forever
+    pending::<()>().await;
+
+    Ok(())
+}

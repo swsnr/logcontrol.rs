@@ -174,6 +174,11 @@ pub trait LogControl1 {
     fn syslog_identifier(&self) -> &str;
 }
 
+/// The DBus object path a log control interface needs to be served on for systemd to find it.
+///
+/// The path is `/org/freedesktop/LogControl1`, as required by the interface specification.
+pub static DBUS_OBJ_PATH: &str = "/org/freedesktop/LogControl1";
+
 /// Whether the current process is directly connected to the systemd journal.
 ///
 /// Use this function to select an appropriate target for [`LogTarget::Auto`].

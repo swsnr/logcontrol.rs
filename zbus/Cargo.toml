@@ -1,0 +1,16 @@
+[package]
+name = "logcontrol-zbus"
+version = "0.1.0"
+homepage.workspace = true
+repository.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+categories.workspace = true
+
+[dependencies]
+logcontrol = { version = "0.1.0", path = "../logcontrol" }
+zbus = { version = "3.14.1" }
+
+[dev-dependencies]
+async-std = { version = "1.12.0", features = ["attributes"] }
