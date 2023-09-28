@@ -6,7 +6,7 @@ This interface provides means to change logging behaviour of system services at 
 
 This repository provides a collection of traits of basic types and implementations of this interface:
 
-- [`logcontrol`](./logcontrol) contains the basic types and defines an abstract trait for the interface.
+- `logcontrol` contains the basic types and defines an abstract trait for the interface.
 - [`logcontrol-tracing`](./tracing) provides a logcontrol backend implementation for the [`tracing`][tracing] library.
 - [`logcontrol-zbus`](./zbus) provides a DBus interface implementation for [`zbus`][zbus] DBus framework.
 
