@@ -62,6 +62,7 @@
 //! its stderr directly connected to the systemd journal (as for all processes
 //! directly started via systemd units); in this case a log control implementation
 //! should default to logging to the [`KnownLogTarget::Journal`] log target.
+//! This function also helps to implement the [`KnownLogTarget::Auto`] target.
 //!
 //! ## Logging framework implementations and DBus frontends
 //!
@@ -182,6 +183,25 @@ pub enum KnownLogTarget {
     ///
     /// Services which use systemd should prefer the `Journal` interface.
     Syslog,
+    /// Disable all logging.
+    ///
+    /// Note that even though this target is not documented in the logcontrol
+    /// interface definition, the `systemctl(1)` manpage mentions it for the
+    /// `service-log-target` command.
+    Null,
+    /// Automatically log to console or journal.
+    ///
+    /// If the stdout or stderr streams of the current process are
+    /// connected to the systemd journal this is equivalent to `Journal`.
+    /// Otherwise it's `Console`.
+    ///
+    /// See [`stderr_connected_to_journal`] for a function which implements this
+    /// check.
+    ///
+    /// Note that even though this target is not documented in the logcontrol
+    /// interface definition, the `systemctl(1)` manpage mentions it for the
+    /// `service-log-target` command.
+    Auto,
 }
 
 impl KnownLogTarget {
@@ -192,6 +212,8 @@ impl KnownLogTarget {
             KnownLogTarget::Kmsg => "kmsg",
             KnownLogTarget::Journal => "journal",
             KnownLogTarget::Syslog => "syslog",
+            KnownLogTarget::Null => "null",
+            KnownLogTarget::Auto => "auto",
         }
     }
 }
@@ -216,6 +238,8 @@ impl TryFrom<&str> for KnownLogTarget {
             "kmsg" => Ok(KnownLogTarget::Kmsg),
             "journal" => Ok(KnownLogTarget::Journal),
             "syslog" => Ok(KnownLogTarget::Syslog),
+            "null" => Ok(KnownLogTarget::Null),
+            "auto" => Ok(KnownLogTarget::Auto),
             _ => Err(LogTargetParseError(value.to_string())),
         }
     }
@@ -288,6 +312,8 @@ pub trait LogControl1 {
 pub static DBUS_OBJ_PATH: &str = "/org/freedesktop/LogControl1";
 
 /// Whether the current process is directly connected to the systemd journal.
+///
+/// You can use this function to implement [`KnownLogTarget::Auto`].
 pub fn stderr_connected_to_journal() -> bool {
     todo!()
 }

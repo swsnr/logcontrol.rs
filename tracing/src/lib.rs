@@ -23,8 +23,9 @@
 //!
 //! let (control, layer) = TracingLogControl1::new(
 //!     PrettyLogControl1LayerFactory,
+//!     false,
 //!     "syslog_identifier".to_string(),
-//!     LogTarget::Console,
+//!     KnownLogTarget::Auto,
 //!     LogLevel::Info,
 //! ).unwrap();
 //!
@@ -46,6 +47,7 @@ use tracing_subscriber::{
 enum TracingLogTarget {
     Console,
     Journal,
+    Null,
 }
 
 impl From<TracingLogTarget> for KnownLogTarget {
@@ -53,21 +55,24 @@ impl From<TracingLogTarget> for KnownLogTarget {
         match value {
             TracingLogTarget::Console => KnownLogTarget::Console,
             TracingLogTarget::Journal => KnownLogTarget::Journal,
+            TracingLogTarget::Null => KnownLogTarget::Null,
         }
     }
 }
 
-impl TryFrom<KnownLogTarget> for TracingLogTarget {
-    type Error = LogControl1Error;
-
-    fn try_from(value: KnownLogTarget) -> Result<Self, Self::Error> {
-        match value {
-            KnownLogTarget::Console => Ok(TracingLogTarget::Console),
-            KnownLogTarget::Journal => Ok(TracingLogTarget::Journal),
-            other => Err(LogControl1Error::UnsupportedLogTarget(
-                other.as_str().to_string(),
-            )),
-        }
+fn from_known_log_target(
+    target: KnownLogTarget,
+    connected_to_journal: bool,
+) -> Result<TracingLogTarget, LogControl1Error> {
+    match target {
+        KnownLogTarget::Auto if connected_to_journal => Ok(TracingLogTarget::Journal),
+        KnownLogTarget::Auto => Ok(TracingLogTarget::Console),
+        KnownLogTarget::Console => Ok(TracingLogTarget::Console),
+        KnownLogTarget::Journal => Ok(TracingLogTarget::Journal),
+        KnownLogTarget::Null => Ok(TracingLogTarget::Null),
+        other => Err(LogControl1Error::UnsupportedLogTarget(
+            other.as_str().to_string(),
+        )),
     }
 }
 
@@ -190,6 +195,8 @@ where
     F: LogControl1LayerFactory,
     S: Subscriber + for<'span> LookupSpan<'span>,
 {
+    /// Whether the current process is connnected to the systemd journal.
+    connected_to_journal: bool,
     /// The syslog identifier used for logging.
     syslog_identifier: String,
     /// The current level active in the level layer.
@@ -216,17 +223,22 @@ where
     /// log target is changed, to create a new layer to use for the selected log
     /// target.
     ///
+    /// `connected_to_journal` indicates whether this process is connected to the systemd
+    /// journal. Set to `true` to make [`KnownLogTarget::Auto`] use [`KnownLogTarget::Journal`],
+    /// otherwise it uses [`KnownLogTarget::Console`].
+    ///
     /// `level` likewise denotes the default log level to start with.
     ///
     /// `syslog_identifier` is passed to [`LogControl1LayerFactory::create_journal_layer`] for use as `SYSLOG_IDENTIFIER`
     /// journal field.
     pub fn new(
         factory: F,
+        connected_to_journal: bool,
         syslog_identifier: String,
         target: KnownLogTarget,
         level: LogLevel,
     ) -> Result<(Self, LogControl1Layer<F, S>), LogControl1Error> {
-        let tracing_target = target.try_into()?;
+        let tracing_target = from_known_log_target(target, connected_to_journal)?;
         let tracing_level = from_log_level(level)?;
         let (target_layer, target_handle) = reload::Layer::new(make_target_layer(
             &factory,
@@ -237,6 +249,7 @@ where
             reload::Layer::new(LevelFilter::from_level(tracing_level));
         let control_layer = Layer::and_then(level_layer, target_layer);
         let control = Self {
+            connected_to_journal,
             layer_factory: factory,
             syslog_identifier,
             level: tracing_level,
@@ -276,7 +289,10 @@ where
     }
 
     fn set_target<T: AsRef<str>>(&mut self, target: T) -> Result<(), LogControl1Error> {
-        let new_tracing_target = KnownLogTarget::try_from(target.as_ref())?.try_into()?;
+        let new_tracing_target = from_known_log_target(
+            KnownLogTarget::try_from(target.as_ref())?,
+            self.connected_to_journal,
+        )?;
         let new_layer = make_target_layer(
             &self.layer_factory,
             new_tracing_target,
