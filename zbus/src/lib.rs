@@ -36,7 +36,7 @@
 #![deny(warnings, clippy::all)]
 #![forbid(unsafe_code)]
 
-use logcontrol::{LogControl1Error, LogLevel, LogTarget};
+use logcontrol::{LogControl1Error, LogLevel};
 use zbus::dbus_interface;
 
 fn to_fdo_error(error: LogControl1Error) -> zbus::fdo::Error {
@@ -102,8 +102,6 @@ where
     /// Change the log target.
     #[dbus_interface(property)]
     async fn set_log_target(&mut self, target: String) -> zbus::fdo::Result<()> {
-        let target = LogTarget::try_from(target.as_str())
-            .map_err(|error| zbus::fdo::Error::InvalidArgs(error.to_string()))?;
         self.control.set_target(target).map_err(to_fdo_error)
     }
 

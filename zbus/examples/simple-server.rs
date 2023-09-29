@@ -20,7 +20,7 @@ use zbus::ConnectionBuilder;
 
 struct DummyLogControl {
     level: logcontrol::LogLevel,
-    target: logcontrol::LogTarget,
+    target: logcontrol::KnownLogTarget,
 }
 
 impl LogControl1 for DummyLogControl {
@@ -37,16 +37,13 @@ impl LogControl1 for DummyLogControl {
         Ok(())
     }
 
-    fn target(&self) -> logcontrol::LogTarget {
-        self.target
+    fn target(&self) -> &str {
+        self.target.as_str()
     }
 
-    fn set_target(
-        &mut self,
-        target: logcontrol::LogTarget,
-    ) -> Result<(), logcontrol::LogControl1Error> {
-        eprintln!("Setting target to {target}");
-        self.target = target;
+    fn set_target<S: AsRef<str>>(&mut self, target: S) -> Result<(), logcontrol::LogControl1Error> {
+        eprintln!("Setting target to {}", target.as_ref());
+        self.target = target.as_ref().try_into()?;
         Ok(())
     }
 
@@ -59,7 +56,7 @@ impl LogControl1 for DummyLogControl {
 async fn main() -> Result<(), Box<dyn Error>> {
     let control = DummyLogControl {
         level: logcontrol::LogLevel::Info,
-        target: logcontrol::LogTarget::Console,
+        target: logcontrol::KnownLogTarget::Console,
     };
     let _conn = ConnectionBuilder::session()?
         .name("de.swsnr.logcontrol.SimpleServerExample")?

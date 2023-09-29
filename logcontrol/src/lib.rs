@@ -61,7 +61,7 @@
 //! [`stderr_connected_to_journal`] determines whether the current process has
 //! its stderr directly connected to the systemd journal (as for all processes
 //! directly started via systemd units); in this case a log control implementation
-//! should default to logging to the [`LogTarget::Journal`] log target.
+//! should default to logging to the [`KnownLogTarget::Journal`] log target.
 //!
 //! ## Logging framework implementations and DBus frontends
 //!
@@ -150,9 +150,19 @@ impl Display for LogLevel {
     }
 }
 
-/// Log targets used by the systemd log control interface.
+/// Known log targets documented in the log control interface or `systemctl(1)`.
+///
+/// Note that `systemctl` does not validate the log target; `systemctl service-log-target`
+/// passes any given string to the service.
+///
+/// This enum represents all log targets documented at various places, and their
+/// semantics.
+///
+/// Implementations of [`LogControl1`] can use this enum to parse known targets,
+/// or entirely ignore it and handle the target themselves; the latter allows
+/// services to implement their own proprietary log targets.
 #[derive(Debug, Copy, Clone, PartialEq, Eq)]
-pub enum LogTarget {
+pub enum KnownLogTarget {
     /// Log to the console or standard output.
     Console,
     /// The kernel ring message buffer.
@@ -174,34 +184,46 @@ pub enum LogTarget {
     Syslog,
 }
 
-/// The log target was invalid.
-#[derive(Debug, Copy, Clone, Error)]
-#[error("Invalid log target")]
-pub struct LogTargetParseError;
-
-impl TryFrom<&str> for LogTarget {
-    type Error = LogTargetParseError;
-
-    fn try_from(value: &str) -> Result<Self, Self::Error> {
-        match value {
-            "console" => Ok(LogTarget::Console),
-            "kmsg" => Ok(LogTarget::Kmsg),
-            "journal" => Ok(LogTarget::Journal),
-            "syslog" => Ok(LogTarget::Syslog),
-            _ => Err(LogTargetParseError),
+impl KnownLogTarget {
+    /// Convert to the corresponding string representation.
+    pub fn as_str(self) -> &'static str {
+        match self {
+            KnownLogTarget::Console => "console",
+            KnownLogTarget::Kmsg => "kmsg",
+            KnownLogTarget::Journal => "journal",
+            KnownLogTarget::Syslog => "syslog",
         }
     }
 }
 
-impl Display for LogTarget {
+/// The log target was invalid.
+#[derive(Debug, Clone, Error)]
+#[error("Invalid log target: '{0}'")]
+pub struct LogTargetParseError(String);
+
+impl From<LogTargetParseError> for LogControl1Error {
+    fn from(value: LogTargetParseError) -> Self {
+        Self::UnsupportedLogTarget(value.0)
+    }
+}
+
+impl TryFrom<&str> for KnownLogTarget {
+    type Error = LogTargetParseError;
+
+    fn try_from(value: &str) -> Result<Self, Self::Error> {
+        match value {
+            "console" => Ok(KnownLogTarget::Console),
+            "kmsg" => Ok(KnownLogTarget::Kmsg),
+            "journal" => Ok(KnownLogTarget::Journal),
+            "syslog" => Ok(KnownLogTarget::Syslog),
+            _ => Err(LogTargetParseError(value.to_string())),
+        }
+    }
+}
+
+impl Display for KnownLogTarget {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
-        let target = match self {
-            LogTarget::Console => "console",
-            LogTarget::Kmsg => "kmsg",
-            LogTarget::Journal => "journal",
-            LogTarget::Syslog => "syslog",
-        };
-        write!(f, "{target}")
+        write!(f, "{}", self.as_str())
     }
 }
 
@@ -213,7 +235,7 @@ pub enum LogControl1Error {
     UnsupportedLogLevel(LogLevel),
     /// A log target is not supported by the underlying log framework.
     #[error("The log target {0} is not supported")]
-    UnsupportedLogTarget(LogTarget),
+    UnsupportedLogTarget(String),
     /// An IO error occurred while changing log target or log level.
     #[error(transparent)]
     InputOutputError(#[from] std::io::Error),
@@ -240,10 +262,21 @@ pub trait LogControl1 {
     fn set_level(&mut self, level: LogLevel) -> Result<(), LogControl1Error>;
 
     /// Get the currently configured log target.
-    fn target(&self) -> LogTarget;
+    fn target(&self) -> &str;
 
     /// Set the target of the underlying log framework.
-    fn set_target(&mut self, target: LogTarget) -> Result<(), LogControl1Error>;
+    ///
+    /// Systemd documents some known targets both in the `LogControl1` interface
+    /// definition, as well as in the `systemctl(1)` manpage.  The [`KnownLogTarget`]
+    /// enum represents all these known targets.
+    ///
+    /// However, implementations are free to use their own proprietary targets;
+    /// `systemctl service-log-target` actually forwards any given string to the
+    /// service.
+    ///
+    /// It's a good idea though to support at least [`KnownLogTarget::Console`]
+    /// and [`KnownLogTarget::Journal`].
+    fn set_target<S: AsRef<str>>(&mut self, target: S) -> Result<(), LogControl1Error>;
 
     /// Get the syslog identifier.
     fn syslog_identifier(&self) -> &str;

@@ -36,7 +36,7 @@
 #![deny(warnings, clippy::all, missing_docs)]
 #![forbid(unsafe_code)]
 
-use logcontrol::{LogControl1, LogControl1Error, LogLevel, LogTarget};
+use logcontrol::{KnownLogTarget, LogControl1, LogControl1Error, LogLevel};
 use tracing::Subscriber;
 use tracing_subscriber::{
     filter::LevelFilter, fmt, layer::Layered, registry::LookupSpan, reload, Layer,
@@ -48,23 +48,25 @@ enum TracingLogTarget {
     Journal,
 }
 
-impl From<TracingLogTarget> for LogTarget {
+impl From<TracingLogTarget> for KnownLogTarget {
     fn from(value: TracingLogTarget) -> Self {
         match value {
-            TracingLogTarget::Console => LogTarget::Console,
-            TracingLogTarget::Journal => LogTarget::Journal,
+            TracingLogTarget::Console => KnownLogTarget::Console,
+            TracingLogTarget::Journal => KnownLogTarget::Journal,
         }
     }
 }
 
-impl TryFrom<LogTarget> for TracingLogTarget {
+impl TryFrom<KnownLogTarget> for TracingLogTarget {
     type Error = LogControl1Error;
 
-    fn try_from(value: LogTarget) -> Result<Self, Self::Error> {
+    fn try_from(value: KnownLogTarget) -> Result<Self, Self::Error> {
         match value {
-            LogTarget::Console => Ok(TracingLogTarget::Console),
-            LogTarget::Journal => Ok(TracingLogTarget::Journal),
-            other => Err(LogControl1Error::UnsupportedLogTarget(other)),
+            KnownLogTarget::Console => Ok(TracingLogTarget::Console),
+            KnownLogTarget::Journal => Ok(TracingLogTarget::Journal),
+            other => Err(LogControl1Error::UnsupportedLogTarget(
+                other.as_str().to_string(),
+            )),
         }
     }
 }
@@ -97,12 +99,12 @@ fn to_log_level(level: tracing::Level) -> LogLevel {
 
 /// A factory to create layers for [`TracingLogControl1`].
 pub trait LogControl1LayerFactory {
-    /// The type of the layer to use for [`LogTarget::Journal`].
+    /// The type of the layer to use for [`KnownLogTarget::Journal`].
     type JournalLayer<S: Subscriber + for<'span> LookupSpan<'span>>: Layer<S>;
-    /// The type of the layer to use for [`LogTarget::Console`].
+    /// The type of the layer to use for [`KnownLogTarget::Console`].
     type ConsoleLayer<S: Subscriber + for<'span> LookupSpan<'span>>: Layer<S>;
 
-    /// Create a layer to use when [`LogTarget::Journal`] is selected.
+    /// Create a layer to use when [`KnownLogTarget::Journal`] is selected.
     ///
     /// The `syslog_identifier` should be send to the journal as `SYSLOG_IDENTIFIER`, to support `journalctl -t`.
     /// See [`systemd.journal-fields(7)`](https://www.freedesktop.org/software/systemd/man/systemd.journal-fields.html).
@@ -111,7 +113,7 @@ pub trait LogControl1LayerFactory {
         syslog_identifier: String,
     ) -> Result<Self::JournalLayer<S>, LogControl1Error>;
 
-    /// Create a layer to use when [`LogTarget::Console`] is selected.
+    /// Create a layer to use when [`KnownLogTarget::Console`] is selected.
     fn create_console_layer<S: Subscriber + for<'span> LookupSpan<'span>>(
         &self,
     ) -> Result<Self::ConsoleLayer<S>, LogControl1Error>;
@@ -119,10 +121,10 @@ pub trait LogControl1LayerFactory {
 
 /// A layer factory which uses pretty printing on stdout for the console target.
 ///
-/// For [`LogTarget::Console`] this layer factory creates a [`mod@tracing_subscriber::fmt`]
+/// For [`KnownLogTarget::Console`] this layer factory creates a [`mod@tracing_subscriber::fmt`]
 /// layer which logs to stdout with the built-in pretty format.
 ///
-/// For [`LogTarget::Journal`] this layer factory creates a [`tracing_journald`]
+/// For [`KnownLogTarget::Journal`] this layer factory creates a [`tracing_journald`]
 /// layer without field prefixes and no further customization.
 pub struct PrettyLogControl1LayerFactory;
 
@@ -221,7 +223,7 @@ where
     pub fn new(
         factory: F,
         syslog_identifier: String,
-        target: LogTarget,
+        target: KnownLogTarget,
         level: LogLevel,
     ) -> Result<(Self, LogControl1Layer<F, S>), LogControl1Error> {
         let tracing_target = target.try_into()?;
@@ -269,12 +271,12 @@ where
         Ok(())
     }
 
-    fn target(&self) -> LogTarget {
-        self.target.into()
+    fn target(&self) -> &str {
+        KnownLogTarget::from(self.target).as_str()
     }
 
-    fn set_target(&mut self, target: LogTarget) -> Result<(), LogControl1Error> {
-        let new_tracing_target = target.try_into()?;
+    fn set_target<T: AsRef<str>>(&mut self, target: T) -> Result<(), LogControl1Error> {
+        let new_tracing_target = KnownLogTarget::try_from(target.as_ref())?.try_into()?;
         let new_layer = make_target_layer(
             &self.layer_factory,
             new_tracing_target,
@@ -282,7 +284,8 @@ where
         )?;
         self.target_handle.reload(new_layer).map_err(|error| {
             LogControl1Error::Failure(format!(
-                "Failed to reload target layer to switch to log target {target}: {error}"
+                "Failed to reload target layer to switch to log target {}: {error}",
+                target.as_ref()
             ))
         })?;
         self.target = new_tracing_target;
