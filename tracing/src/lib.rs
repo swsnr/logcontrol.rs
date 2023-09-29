@@ -38,7 +38,9 @@
 
 use logcontrol::{LogControl1, LogControl1Error, LogLevel, LogTarget};
 use tracing::Subscriber;
-use tracing_subscriber::{fmt, layer::Layered, registry::LookupSpan, reload, Layer};
+use tracing_subscriber::{
+    filter::LevelFilter, fmt, layer::Layered, registry::LookupSpan, reload, Layer,
+};
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 enum TracingLogTarget {
@@ -154,7 +156,8 @@ pub type LogTargetLayer<F, S> = Layered<
 >;
 
 /// The final type for the layer that implements the log control interface.
-pub type LogControl1Layer<F, S> = reload::Layer<LogTargetLayer<F, S>, S>;
+pub type LogControl1Layer<F, S> =
+    Layered<reload::Layer<LogTargetLayer<F, S>, S>, reload::Layer<LevelFilter, S>, S>;
 
 fn make_target_layer<F: LogControl1LayerFactory, S>(
     factory: &F,
@@ -194,7 +197,7 @@ where
     /// Factory for layers.
     layer_factory: F,
     // /// A handle to reload the level layer in order to change the level.
-    // level_handle: reload::Handle<LevelFilter, FilterSubscriber>,
+    level_handle: reload::Handle<LevelFilter, S>,
     // /// A handle to reload the target layer in order to change the target.
     target_handle: reload::Handle<LogTargetLayer<F, S>, S>,
 }
@@ -228,15 +231,19 @@ where
             tracing_target,
             &syslog_identifier,
         )?);
+        let (level_layer, level_handle) =
+            reload::Layer::new(LevelFilter::from_level(tracing_level));
+        let control_layer = Layer::and_then(level_layer, target_layer);
         let control = Self {
             layer_factory: factory,
             syslog_identifier,
             level: tracing_level,
             target: tracing_target,
+            level_handle,
             target_handle,
         };
 
-        Ok((control, target_layer))
+        Ok((control, control_layer))
     }
 }
 
@@ -249,8 +256,17 @@ where
         to_log_level(self.level)
     }
 
-    fn set_level(&mut self, _level: LogLevel) -> Result<(), LogControl1Error> {
-        todo!()
+    fn set_level(&mut self, level: LogLevel) -> Result<(), LogControl1Error> {
+        let tracing_level = from_log_level(level)?;
+        self.level_handle
+            .reload(LevelFilter::from_level(tracing_level))
+            .map_err(|error| {
+                LogControl1Error::Failure(format!(
+                    "Failed to reload target layer to switch to log target {level}: {error}"
+                ))
+            })?;
+        self.level = tracing_level;
+        Ok(())
     }
 
     fn target(&self) -> LogTarget {
