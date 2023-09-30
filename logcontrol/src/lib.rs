@@ -85,6 +85,7 @@
 #![forbid(unsafe_code)]
 
 use std::fmt::{Display, Formatter};
+use std::os::{fd::AsFd, linux::fs::MetadataExt};
 
 use thiserror::Error;
 
@@ -314,8 +315,21 @@ pub static DBUS_OBJ_PATH: &str = "/org/freedesktop/LogControl1";
 /// Whether the current process is directly connected to the systemd journal.
 ///
 /// You can use this function to implement [`KnownLogTarget::Auto`].
+///
+/// Return `true` if the device and inode numbers of the [`std::io::stderr`]
+/// file descriptor match the value of `$JOURNAL_STREAM` (see `systemd.exec(5)`).
+/// Otherwise, return `false`.
 pub fn stderr_connected_to_journal() -> bool {
-    todo!()
+    std::io::stderr()
+        .as_fd()
+        .try_clone_to_owned()
+        .and_then(|fd| std::fs::File::from(fd).metadata())
+        .map(|metadata| format!("{}:{}", metadata.st_dev(), metadata.st_ino()))
+        .ok()
+        .and_then(|stderr| {
+            std::env::var_os("JOURNAL_STREAM").map(|s| s.to_string_lossy() == stderr.as_str())
+        })
+        .unwrap_or(false)
 }
 
 /// Determine the syslog identifier for this process.
