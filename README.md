@@ -1,5 +1,8 @@
 # logcontrol.rs
 
+[![Crates.io](https://img.shields.io/crates/v/logcontrol)](https://crates.io/crates/logcontrol)
+[![docs.rs](https://img.shields.io/docsrs/logcontrol)](https://docs.rs/logcontrol)
+
 Types and implementations for systemd's [logcontrol] interface.
 
 This interface provides means to change logging behaviour of system services at runtime, over D-Bus, or via `systemctl service-log-level` or `systemctl service-log-target`.
