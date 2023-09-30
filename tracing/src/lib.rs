@@ -247,7 +247,7 @@ where
     /// journal. Set to `true` to make [`KnownLogTarget::Auto`] use [`KnownLogTarget::Journal`],
     /// otherwise it uses [`KnownLogTarget::Console`].
     ///
-    /// `level` likewise denotes the default log level to start with.
+    /// `level` denotes the default tracing log level to start with.
     ///
     /// `syslog_identifier` is passed to [`LogControl1LayerFactory::create_journal_layer`]
     /// for use as `SYSLOG_IDENTIFIER` journal field.
@@ -261,23 +261,21 @@ where
         connected_to_journal: bool,
         syslog_identifier: String,
         target: KnownLogTarget,
-        level: LogLevel,
+        level: tracing::Level,
     ) -> Result<(Self, LogControl1Layer<F, S>), LogControl1Error> {
         let tracing_target = from_known_log_target(target, connected_to_journal)?;
-        let tracing_level = from_log_level(level)?;
         let (target_layer, target_handle) = reload::Layer::new(make_target_layer(
             &factory,
             tracing_target,
             &syslog_identifier,
         )?);
-        let (level_layer, level_handle) =
-            reload::Layer::new(LevelFilter::from_level(tracing_level));
+        let (level_layer, level_handle) = reload::Layer::new(LevelFilter::from_level(level));
         let control_layer = Layer::and_then(level_layer, target_layer);
         let control = Self {
             connected_to_journal,
             layer_factory: factory,
             syslog_identifier,
-            level: tracing_level,
+            level,
             target: tracing_target,
             level_handle,
             target_handle,
@@ -296,7 +294,7 @@ where
     ///  see [`Self::new`].
     pub fn new_auto(
         factory: F,
-        level: LogLevel,
+        level: tracing::Level,
     ) -> Result<(Self, LogControl1Layer<F, S>), LogControl1Error> {
         Self::new(
             factory,
