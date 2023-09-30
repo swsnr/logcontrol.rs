@@ -7,7 +7,7 @@ repository = "https://github.com/swsnr/logcontrol.rs.git"
 edition = "2021"
 rust-version = "1.71"
 license = "MIT OR Apache-2.0"
-categories = ["debugging"]
+categories = ["development-tools::debugging"]
 
 # Defaults for cargo release for this entire workspace
 [workspace.metadata.release]
