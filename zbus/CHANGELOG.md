@@ -7,6 +7,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+- Re-export `logcontrol` and `logcontrol::DBUS_OBJ_PATH`.
+
 ## [1.0.0] – 2023-09-30
 
 Initial release.

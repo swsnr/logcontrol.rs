@@ -39,6 +39,9 @@
 use logcontrol::{LogControl1Error, LogLevel};
 use zbus::dbus_interface;
 
+pub use logcontrol;
+pub use logcontrol::DBUS_OBJ_PATH;
+
 fn to_fdo_error(error: LogControl1Error) -> zbus::fdo::Error {
     use LogControl1Error::*;
     match error {

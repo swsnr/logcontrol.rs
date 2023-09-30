@@ -7,6 +7,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+- Re-export `logcontrol`, `logcontrol::syslog_identifier` and `logcontrol::stderr_connected_to_journal`.
+
 ## [0.1.0] – 2023-09-30
 
 Initial release.

@@ -41,6 +41,10 @@ use tracing_subscriber::layer::Layered;
 use tracing_subscriber::registry::LookupSpan;
 use tracing_subscriber::{fmt, reload, Layer};
 
+pub use logcontrol;
+pub use logcontrol::stderr_connected_to_journal;
+pub use logcontrol::syslog_identifier;
+
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 enum TracingLogTarget {
     Console,
