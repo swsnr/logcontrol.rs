@@ -1,5 +1,6 @@
 [package]
 name = "logcontrol-zbus"
+description = "zbus-based DBus frontend for the logcontrol interface"
 version = "0.1.0"
 homepage.workspace = true
 repository.workspace = true
