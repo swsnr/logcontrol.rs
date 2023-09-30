@@ -26,7 +26,7 @@
 //!     false,
 //!     "syslog_identifier".to_string(),
 //!     KnownLogTarget::Auto,
-//!     LogLevel::Info,
+//!     tracing::Level::INFO,
 //! ).unwrap();
 //!
 //! let subscriber = tracing_subscriber::Registry::default().with(layer);
