@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.0.0] – 2023-09-30
+
 Initial release.
 
 ### Added
@@ -17,4 +19,5 @@ Initial release.
     - `stderr_connected_to_journal`
     - `syslog_identifier`
 
-[Unreleased]:
+[Unreleased]: https://github.com/swsnr/mdcat/compare/logcontrol-v1.0.0...HEAD
+[1.0.0]: https://github.com/swsnr/mdcat/releases/tag/logcontrol-v1.0.0

@@ -1,6 +1,6 @@
 [package]
 name = "logcontrol"
-version = "0.1.0"
+version = "1.0.0"
 description = "Abstract types for the systemd logcontrol interface"
 readme = "../README.md"
 authors = ["Sebastian Wiesner <sebastian@swsnr.de>"]
