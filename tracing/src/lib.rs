@@ -21,11 +21,8 @@
 //! use logcontrol_tracing::*;
 //! use tracing_subscriber::prelude::*;
 //!
-//! let (control, layer) = TracingLogControl1::new(
+//! let (control, layer) = TracingLogControl1::new_auto(
 //!     PrettyLogControl1LayerFactory,
-//!     false,
-//!     "syslog_identifier".to_string(),
-//!     KnownLogTarget::Auto,
 //!     tracing::Level::INFO,
 //! ).unwrap();
 //!
