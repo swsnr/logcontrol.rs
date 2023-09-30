@@ -7,7 +7,7 @@
 //! ```ignore
 //! #[async_std::main]
 //! async fn main() -> Result<(), Box<dyn std::error::Error>> {
-//!     let control = todo!();
+//!     let control = create_log_control();
 //!     let _conn = zbus::ConnectionBuilder::session()?
 //!         .name("de.swsnr.logcontrol.SimpleServerExample")?
 //!         .serve_at(
