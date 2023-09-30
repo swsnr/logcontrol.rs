@@ -5,15 +5,14 @@
 //! over DBus, as a standard zbus DBus interface:
 //!
 //! ```ignore
+//! use logcontrol_zbus::{LogControl1, ConnectionBuilderExt};
+//!
 //! #[async_std::main]
 //! async fn main() -> Result<(), Box<dyn std::error::Error>> {
 //!     let control = create_log_control();
 //!     let _conn = zbus::ConnectionBuilder::session()?
 //!         .name("de.swsnr.logcontrol.SimpleServerExample")?
-//!         .serve_at(
-//!             logcontrol::DBUS_OBJ_PATH,
-//!             logcontrol_zbus::LogControl1::new(control),
-//!         )?
+//!         .serve_log_control(LogControl1::new(control))?
 //!         .build()
 //!         .await?;
 //!
@@ -112,5 +111,32 @@ where
     #[dbus_interface(property)]
     fn syslog_identifier(&self) -> &str {
         self.control.syslog_identifier()
+    }
+}
+
+/// Extend `ConnectionBuilder` to serve log control interfaces.
+pub trait ConnectionBuilderExt {
+    /// Serve the given log control interface on this connection builder.
+    fn serve_log_control<C>(self, iface: LogControl1<C>) -> zbus::Result<Self>
+    where
+        Self: Sized,
+        C: logcontrol::LogControl1 + Send + Sync + 'static;
+}
+
+impl ConnectionBuilderExt for zbus::ConnectionBuilder<'_> {
+    fn serve_log_control<C>(self, iface: LogControl1<C>) -> zbus::Result<Self>
+    where
+        C: logcontrol::LogControl1 + Send + Sync + 'static,
+    {
+        self.serve_at(DBUS_OBJ_PATH, iface)
+    }
+}
+
+impl ConnectionBuilderExt for zbus::blocking::ConnectionBuilder<'_> {
+    fn serve_log_control<C>(self, iface: LogControl1<C>) -> zbus::Result<Self>
+    where
+        C: logcontrol::LogControl1 + Send + Sync + 'static,
+    {
+        self.serve_at(DBUS_OBJ_PATH, iface)
     }
 }

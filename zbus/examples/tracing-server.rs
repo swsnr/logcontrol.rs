@@ -20,6 +20,7 @@ use std::error::Error;
 use std::time::Duration;
 
 use logcontrol_tracing::{PrettyLogControl1LayerFactory, TracingLogControl1};
+use logcontrol_zbus::ConnectionBuilderExt;
 use tracing::{event, Level};
 use tracing_subscriber::prelude::*;
 use tracing_subscriber::Registry;
@@ -42,10 +43,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
     tracing::subscriber::set_global_default(subscriber).unwrap();
     let _conn = ConnectionBuilder::session()?
         .name("de.swsnr.logcontrol.TracingServerExample")?
-        .serve_at(
-            logcontrol::DBUS_OBJ_PATH,
-            logcontrol_zbus::LogControl1::new(control),
-        )?
+        .serve_log_control(logcontrol_zbus::LogControl1::new(control))?
         .build()
         .await?;
 
