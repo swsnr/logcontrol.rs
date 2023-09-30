@@ -8,3 +8,14 @@ edition = "2021"
 rust-version = "1.71"
 license = "MIT OR Apache-2.0"
 categories = ["debugging"]
+
+# Defaults for cargo release for this entire workspace
+[workspace.metadata.release]
+allow-branch = ["main"]
+sign-tag = true
+sign-commit = true
+pre-release-commit-message = "Release {{crate_name}} {{version}}"
+tag-message = "{{crate_name}} {{version}}"
+tag-prefix = "{{crate_name}}-"
+# That's what we have github actions for
+verify = false
