@@ -18,3 +18,9 @@ async-std = { version = "1.12.0", features = ["attributes"] }
 logcontrol-tracing = { path = "../tracing" }
 tracing = { version = "0.1.37" }
 tracing-subscriber = { version = "0.3.17" }
+
+[package.metadata.release]
+pre-release-replacements = [
+    { file = "CHANGELOG.md", search = "## \\[Unreleased\\]", replace = "## [Unreleased]\n\n## [{{version}}] – {{date}}", exactly = 1 },
+    { file = "CHANGELOG.md", search = "\\[Unreleased\\]:", replace = "[Unreleased]: https://github.com/swsnr/logcontrol.rs/compare/{{tag_name}}...HEAD\n[{{version}}]: https://github.com/swsnr/logcontrol.rs/releases/tag/{{tag_name}}", exactly = 1 },
+]
