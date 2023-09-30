@@ -166,6 +166,13 @@ pub type LogTargetLayer<F, S> = Layered<
 pub type LogControl1Layer<F, S> =
     Layered<reload::Layer<LogTargetLayer<F, S>, S>, reload::Layer<LevelFilter, S>, S>;
 
+/// Create a new tracing layer for the given `target`, using the given `factory`.
+///
+/// We don't handle the `Null` target explicitly here; it disables logging
+/// simply because it matches none of the other targets, so we automatically
+/// create an empty layer here.
+///
+/// Return any error returned from the factory methods.
 fn make_target_layer<F: LogControl1LayerFactory, S>(
     factory: &F,
     target: TracingLogTarget,
@@ -189,7 +196,19 @@ where
 
 /// A [`LogControl1`] implementation for [`tracing`].
 ///
-/// The type parameter `Format` denotes the tracing format to use when logging to the console.
+/// This implementation creates a tracing layer which combines two reloadable
+/// layers, on for the log target, and another one for the level filter
+/// implementing the desired log level.  It keeps the reload handles internally
+/// and reloads newly created layers whenever the target or the level is changed.
+///
+/// Currently, this implementation only supports the following [`KnownLogTarget`]s:
+///
+/// - [`KnownLogTarget::Console`]
+/// - [`KnownLogTarget::Journal`]
+/// - [`KnownLogTarget::Null`]
+/// - [`KnownLogTarget::Auto`]
+///
+/// Any other target fails with [`LogControl1Error::UnsupportedLogTarget`].
 pub struct TracingLogControl1<F, S>
 where
     F: LogControl1LayerFactory,
@@ -221,7 +240,7 @@ where
     /// `factory` creates the [`tracing_subscriber::Layer`] for the selected `target`
     /// which denotes the initial log target. The `factory` is invoked whenever the
     /// log target is changed, to create a new layer to use for the selected log
-    /// target.
+    /// target.  See [`TracingLogControl1`] for supported `target`s.
     ///
     /// `connected_to_journal` indicates whether this process is connected to the systemd
     /// journal. Set to `true` to make [`KnownLogTarget::Auto`] use [`KnownLogTarget::Journal`],
@@ -229,8 +248,13 @@ where
     ///
     /// `level` likewise denotes the default log level to start with.
     ///
-    /// `syslog_identifier` is passed to [`LogControl1LayerFactory::create_journal_layer`] for use as `SYSLOG_IDENTIFIER`
-    /// journal field.
+    /// `syslog_identifier` is passed to [`LogControl1LayerFactory::create_journal_layer`]
+    /// for use as `SYSLOG_IDENTIFIER` journal field.
+    ///
+    /// Returns an error if `target` is not supported, of if creating a layer fails,
+    /// e.g. when selecting [`KnownLogTarget::Console`] on a system where journald is
+    /// not running, or inside a container which has no direct access to the journald
+    /// socket.
     pub fn new(
         factory: F,
         connected_to_journal: bool,
@@ -259,6 +283,27 @@ where
         };
 
         Ok((control, control_layer))
+    }
+
+    /// Create a new [`LogControl1`] layer with automatic defaults.
+    ///
+    /// Use [`logcontrol::syslog_identifier()`] as the syslog identifier, and
+    /// determine the initial log target automatically according to
+    /// [`logcontrol::stderr_connected_to_journal()`].
+    ///
+    /// `level` denotes the initial level; for `factory` and returned errors,
+    ///  see [`Self::new`].
+    pub fn new_auto(
+        factory: F,
+        level: LogLevel,
+    ) -> Result<(Self, LogControl1Layer<F, S>), LogControl1Error> {
+        Self::new(
+            factory,
+            logcontrol::stderr_connected_to_journal(),
+            logcontrol::syslog_identifier(),
+            KnownLogTarget::Auto,
+            level,
+        )
     }
 }
 
