@@ -56,7 +56,7 @@
 //!
 //! [`DBUS_OBJ_PATH`] provides a constant for the DBUs object path the interface
 //! must be served at according to the interface specification, in order to be
-//! found by `systemdctl`.
+//! found by `systemctl`.
 //!
 //! [`stderr_connected_to_journal`] determines whether the current process has
 //! its stderr directly connected to the systemd journal (as for all processes
@@ -275,7 +275,7 @@ pub enum LogControl1Error {
 ///
 /// Implementations should choose the initial log target automatically, according
 /// to whether their stderr is already connected to the systemd journal directly,
-/// per `$JOURNAL_STREAM` (see [`systemd.exec(5)](https://www.freedesktop.org/software/systemd/man/systemd.exec.html)).
+/// per `$JOURNAL_STREAM` (see [`systemd.exec(5)`](https://www.freedesktop.org/software/systemd/man/systemd.exec.html)).
 /// [`stderr_connected_to_journal`] implements this check.
 ///
 /// [LogControl1]: https://www.freedesktop.org/software/systemd/man/org.freedesktop.LogControl1.html
