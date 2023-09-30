@@ -20,5 +20,5 @@ thiserror = "1.0.49"
 pre-release-replacements = [
     { file = "CHANGELOG.md", search = "## \\[Unreleased\\]", replace = "## [Unreleased]\n\n## [{{version}}] – {{date}}", exactly = 1 },
     { file = "CHANGELOG.md", search = "HEAD", replace = "{{tag_name}}", exactly = 1 },
-    { file = "CHANGELOG.md", search = "\\[Unreleased\\]: ", replace = "[Unreleased]: https://github.com/swsnr/mdcat/compare/{{tag_name}}...HEAD\n[{{version}}]: ", exactly = 1 },
+    { file = "CHANGELOG.md", search = "\\[Unreleased\\]: ", replace = "[Unreleased]: https://github.com/swsnr/logcontrol.rs/compare/{{tag_name}}...HEAD\n[{{version}}]: ", exactly = 1 },
 ]

@@ -19,5 +19,5 @@ Initial release.
     - `stderr_connected_to_journal`
     - `syslog_identifier`
 
-[Unreleased]: https://github.com/swsnr/mdcat/compare/logcontrol-v1.0.0...HEAD
-[1.0.0]: https://github.com/swsnr/mdcat/releases/tag/logcontrol-v1.0.0
+[Unreleased]: https://github.com/swsnr/logcontrol.rs/compare/logcontrol-v1.0.0...HEAD
+[1.0.0]: https://github.com/swsnr/logcontrol.rs/releases/tag/logcontrol-v1.0.0
