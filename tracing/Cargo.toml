@@ -18,7 +18,7 @@ categories.workspace = true
 tracing = { version = "0.1.37", default-features = false, features = ["attributes"] }
 tracing-journald = { version = "0.3.0", default-features = false }
 tracing-subscriber = { version = "0.3.17", default-features = false, features = ["env-filter"] }
-logcontrol = { version = "1.0.0", path = "../logcontrol" }
+logcontrol = { version = "1.0.1", path = "../logcontrol" }
 
 [dev-dependencies]
 static_assertions = "1.1.0"
