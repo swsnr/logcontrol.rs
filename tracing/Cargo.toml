@@ -1,6 +1,6 @@
 [package]
 name = "logcontrol-tracing"
-version = "0.1.0"
+version = "0.2.0"
 description = "Tracing backend for the log control interface"
 documentation = "https://docs.rs/logcontrol-tracing"
 readme = "README.md"
