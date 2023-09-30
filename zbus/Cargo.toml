@@ -2,6 +2,10 @@
 name = "logcontrol-zbus"
 description = "zbus-based DBus frontend for the logcontrol interface"
 version = "1.0.0"
+documentation = "https://docs.rs/logcontrol-zbus"
+authors = ["Sebastian Wiesner <sebastian@swsnr.de>"]
+keywords = ["systemd", "log", "zbus", "dbus"]
+
 homepage.workspace = true
 repository.workspace = true
 edition.workspace = true

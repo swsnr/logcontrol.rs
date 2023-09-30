@@ -2,6 +2,7 @@
 name = "logcontrol"
 version = "1.0.0"
 description = "Abstract types for the systemd logcontrol interface"
+documentation = "https://docs.rs/logcontrol"
 readme = "../README.md"
 authors = ["Sebastian Wiesner <sebastian@swsnr.de>"]
 keywords = ["systemd", "log"]
