@@ -39,9 +39,10 @@
 
 use logcontrol::{KnownLogTarget, LogControl1, LogControl1Error, LogLevel};
 use tracing::Subscriber;
-use tracing_subscriber::{
-    filter::LevelFilter, fmt, layer::Layered, registry::LookupSpan, reload, Layer,
-};
+use tracing_subscriber::filter::LevelFilter;
+use tracing_subscriber::layer::Layered;
+use tracing_subscriber::registry::LookupSpan;
+use tracing_subscriber::{fmt, reload, Layer};
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 enum TracingLogTarget {
