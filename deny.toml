@@ -32,4 +32,7 @@ skip = [
     # zbus transitively brings in these old crate versions
     { name = "syn", version = "1.0.109" },
     { name = "fastrand", version = "1.9.0" },
+    { name = "rustix", version = "0.37.24" },
+    { name = "linux-raw-sys", version = "0.3.8" },
+    { name = "bitflags", version = "1.3.2" },
 ]
