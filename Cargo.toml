@@ -1,5 +1,6 @@
 [workspace]
 members = ["logcontrol", "tracing", "zbus"]
+resolver = "2"
 
 [workspace.package]
 homepage = "https://github.com/swsnr/logcontrol.rs"
