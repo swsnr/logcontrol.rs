@@ -1,5 +1,5 @@
 [workspace]
-members = ["logcontrol", "tracing", "zbus"]
+members = ["logcontrol", "tracing", "zbus", "log-reload"]
 resolver = "2"
 
 [workspace.package]
