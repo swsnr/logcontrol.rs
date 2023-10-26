@@ -7,8 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.1.0] – 2023-10-26
+
 ### Added
 
 - `logcontrol_log::LogController` and `logcontrol_log::LogFactory`.
 
-[Unreleased]:
+[Unreleased]: https://github.com/swsnr/logcontrol.rs/compare/logcontrol-log-v0.1.0...HEAD
+[0.1.0]: https://github.com/swsnr/logcontrol.rs/releases/tag/logcontrol-log-v0.1.0
