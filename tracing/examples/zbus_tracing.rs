@@ -6,7 +6,7 @@
 //! $ systemd-run --user --pty \
 //!     --service-type=dbus --unit=log-control-example.service \
 //!     --property=BusName=de.swsnr.logcontrol.TracingServerExample \
-//!     ./target/debug/examples/tracing-server
+//!     ./target/debug/examples/zbus_tracing
 //! ```
 //!
 //! Then use `systemctl --user service-log-level log-control-example.service`

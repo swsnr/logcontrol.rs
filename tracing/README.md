@@ -15,16 +15,38 @@ $ cargo add logcontrol-tracing
 ```
 
 ```rust
-use logcontrol::*;
-use logcontrol_tracing::*;
+use std::error::Error;
+
+use logcontrol_tracing::{PrettyLogControl1LayerFactory, TracingLogControl1};
+use logcontrol_zbus::ConnectionBuilderExt;
+use tracing::{event, Level};
 use tracing_subscriber::prelude::*;
+use tracing_subscriber::Registry;
+use zbus::ConnectionBuilder;
 
-let (control, layer) = TracingLogControl1::new_auto(
-    PrettyLogControl1LayerFactory,
-    tracing::Level::INFO,
-).unwrap();
+#[async_std::main]
+async fn main() -> Result<(), Box<dyn Error>> {
+    // Setup env filter for convenient log control on console
+    let env_filter = tracing_subscriber::EnvFilter::try_from_default_env().ok();
+    // If an env filter is set with $RUST_LOG use the lowest level as default for the control part,
+    // to make sure the env filter takes precedence initially.
+    let default_level = if env_filter.is_some() {
+        Level::TRACE
+    } else {
+        Level::INFO
+    };
+    let (control, control_layer) =
+        TracingLogControl1::new_auto(PrettyLogControl1LayerFactory, default_level)?;
+    let subscriber = Registry::default().with(env_filter).with(control_layer);
+    tracing::subscriber::set_global_default(subscriber).unwrap();
+    let _conn = ConnectionBuilder::session()?
+        .name("de.swsnr.logcontrol.TracingServerExample")?
+        .serve_log_control(logcontrol_zbus::LogControl1::new(control))?
+        .build()
+        .await?;
 
-let subscriber = tracing_subscriber::Registry::default().with(layer);
-tracing::subscriber::set_global_default(subscriber).unwrap();
-// Then register `control` over DBus, e.g. via `logcontrol_zbus::LogControl1`.
+    loop {
+        // Service event loop
+    }
+}
 ```
