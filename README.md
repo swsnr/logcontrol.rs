@@ -11,10 +11,12 @@ This repository provides a collection of traits of basic types and implementatio
 
 - `logcontrol` contains the basic types and defines an abstract trait for the interface.
 - [`logcontrol-tracing`](https://github.com/swsnr/logcontrol.rs/tree/main/tracing) provides a logcontrol backend implementation for the [`tracing`][tracing] library.
+- [`logcontrol-log`](https://github.com/swsnr/logcontrol.rs/tree/main/log) provides a logcontrol backend implementation for the [`log`][log] library.
 - [`logcontrol-zbus`](https://github.com/swsnr/logcontrol.rs/tree/main/zbus) provides a DBus interface implementation for [`zbus`][zbus] DBus framework.
 
 [logcontrol]: https://www.freedesktop.org/software/systemd/man/org.freedesktop.LogControl1.html#
 [tracing]: https://github.com/tokio-rs/tracing
+[log]: https://github.com/rust-lang/log
 [zbus]: https://github.com/dbus2/zbus
 
 ## Usage

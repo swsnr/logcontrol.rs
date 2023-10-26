@@ -1,0 +1,25 @@
+[package]
+name = "log-reload"
+description = "Dynamically reload log loggers"
+version = "0.1.0"
+documentation = "https://docs.rs/log-reload"
+authors = ["Sebastian Wiesner <sebastian@swsnr.de>"]
+homepage.workspace = true
+repository.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+categories.workspace = true
+
+[dependencies]
+thiserror = "1.0.50"
+log = { version = "0.4.20", default-features = false, features = ["std"] }
+
+[dev-dependencies]
+similar-asserts = "1.5.0"
+
+[package.metadata.release]
+pre-release-replacements = [
+    { file = "CHANGELOG.md", search = "## \\[Unreleased\\]", replace = "## [Unreleased]\n\n## [{{version}}] – {{date}}", exactly = 1 },
+    { file = "CHANGELOG.md", search = "\\[Unreleased\\]:", replace = "[Unreleased]: https://github.com/swsnr/logcontrol.rs/compare/{{tag_name}}...HEAD\n[{{version}}]: https://github.com/swsnr/logcontrol.rs/releases/tag/{{tag_name}}", exactly = 1 },
+]
