@@ -237,7 +237,7 @@ where
     F: LogControl1LayerFactory,
     S: Subscriber + for<'span> LookupSpan<'span>,
 {
-    /// Create a new [`LogControl1`] layer.
+    /// Create a new layer controlled through the log interface.
     ///
     /// `factory` creates the [`tracing_subscriber::Layer`] for the selected `target`
     /// which denotes the initial log target. The `factory` is invoked whenever the
@@ -254,7 +254,7 @@ where
     /// for use as `SYSLOG_IDENTIFIER` journal field.
     ///
     /// Returns an error if `target` is not supported, of if creating a layer fails,
-    /// e.g. when selecting [`KnownLogTarget::Console`] on a system where journald is
+    /// e.g. when selecting [`KnownLogTarget::Journal`] on a system where journald is
     /// not running, or inside a container which has no direct access to the journald
     /// socket.
     pub fn new(
@@ -285,7 +285,7 @@ where
         Ok((control, control_layer))
     }
 
-    /// Create a new [`LogControl1`] layer with automatic defaults.
+    /// Create a new layer controlled through the log interface, with automatic defaults.
     ///
     /// Use [`logcontrol::syslog_identifier()`] as the syslog identifier, and
     /// determine the initial log target automatically according to
