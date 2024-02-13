@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+- Update zbus to version 4 (see [GH-3]).
+
+[GH-3]: https://github.com/swsnr/logcontrol.rs/pull/3
+
 ## [1.1.0] – 2023-09-30
 
 ### Added
