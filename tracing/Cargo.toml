@@ -26,7 +26,7 @@ tracing = { version = "0.1.37" }
 tracing-subscriber = { version = "0.3.17", default-features = false, features = ["ansi", "json"] }
 async-std = { version = "1.12.0", features = ["attributes"] }
 logcontrol-zbus = { path="../zbus" }
-zbus = "3.14.1"
+zbus = "4.0.0"
 
 [package.metadata.release]
 pre-release-replacements = [

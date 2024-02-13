@@ -36,7 +36,7 @@
 #![forbid(unsafe_code)]
 
 use logcontrol::{LogControl1Error, LogLevel};
-use zbus::dbus_interface;
+use zbus::interface;
 
 pub use logcontrol;
 pub use logcontrol::DBUS_OBJ_PATH;
@@ -76,19 +76,19 @@ where
 /// The log control interface.
 ///
 /// See <https://www.freedesktop.org/software/systemd/man/org.freedesktop.LogControl1.html>.
-#[dbus_interface(name = "org.freedesktop.LogControl1")]
+#[interface(name = "org.freedesktop.LogControl1")]
 impl<C> LogControl1<C>
 where
     C: logcontrol::LogControl1 + Send + Sync + 'static,
 {
     /// Get the currently configured log level.
-    #[dbus_interface(property)]
+    #[zbus(property)]
     fn log_level(&self) -> String {
         self.control.level().to_string()
     }
 
     /// Set the new log level.
-    #[dbus_interface(property)]
+    #[zbus(property)]
     fn set_log_level(&mut self, level: String) -> zbus::fdo::Result<()> {
         let level = LogLevel::try_from(level.as_str())
             .map_err(|error| zbus::fdo::Error::InvalidArgs(error.to_string()))?;
@@ -96,19 +96,19 @@ where
     }
 
     /// Get the currently configured log target.
-    #[dbus_interface(property)]
+    #[zbus(property)]
     fn log_target(&self) -> String {
         self.control.target().to_string()
     }
 
     /// Change the log target.
-    #[dbus_interface(property)]
+    #[zbus(property)]
     async fn set_log_target(&mut self, target: String) -> zbus::fdo::Result<()> {
         self.control.set_target(target).map_err(to_fdo_error)
     }
 
     /// Get the syslog identifier used by the service.
-    #[dbus_interface(property)]
+    #[zbus(property)]
     fn syslog_identifier(&self) -> &str {
         self.control.syslog_identifier()
     }
@@ -123,7 +123,7 @@ pub trait ConnectionBuilderExt {
         C: logcontrol::LogControl1 + Send + Sync + 'static;
 }
 
-impl ConnectionBuilderExt for zbus::ConnectionBuilder<'_> {
+impl ConnectionBuilderExt for zbus::connection::Builder<'_> {
     fn serve_log_control<C>(self, iface: LogControl1<C>) -> zbus::Result<Self>
     where
         C: logcontrol::LogControl1 + Send + Sync + 'static,
@@ -132,7 +132,7 @@ impl ConnectionBuilderExt for zbus::ConnectionBuilder<'_> {
     }
 }
 
-impl ConnectionBuilderExt for zbus::blocking::ConnectionBuilder<'_> {
+impl ConnectionBuilderExt for zbus::blocking::connection::Builder<'_> {
     fn serve_log_control<C>(self, iface: LogControl1<C>) -> zbus::Result<Self>
     where
         C: logcontrol::LogControl1 + Send + Sync + 'static,
