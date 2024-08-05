@@ -21,8 +21,4 @@ skip = [
     # tracing-subscriber depends on these older versions too, in some paths
     { name = "regex-automata", version = "0.1.10" },
     { name = "regex-syntax", version = "0.6.29" },
-    # zbus transitively brings in these old crate versions
-    { name = "syn", version = "1.0.109" },
-    { name = "event-listener-strategy", version = "0.4.0" },
-    { name = "event-listener", version = "4.0.3" },
 ]
