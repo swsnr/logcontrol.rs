@@ -23,7 +23,6 @@ use std::time::Duration;
 use log::{info, warn};
 use logcontrol_log::{LogController, LogFactory};
 use logcontrol_zbus::ConnectionBuilderExt;
-use zbus::ConnectionBuilder;
 
 struct Factory;
 
@@ -36,7 +35,7 @@ impl LogFactory for Factory {
 #[async_std::main]
 async fn main() -> Result<(), Box<dyn Error>> {
     let control = LogController::install_auto(Factory, log::Level::Info)?;
-    let _conn = ConnectionBuilder::session()?
+    let _conn = zbus::connection::Builder::session()?
         .name("de.swsnr.logcontrol.LogServerExample")?
         .serve_log_control(logcontrol_zbus::LogControl1::new(control))?
         .build()

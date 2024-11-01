@@ -24,7 +24,6 @@ use logcontrol_zbus::ConnectionBuilderExt;
 use tracing::{event, Level};
 use tracing_subscriber::prelude::*;
 use tracing_subscriber::Registry;
-use zbus::ConnectionBuilder;
 
 #[async_std::main]
 async fn main() -> Result<(), Box<dyn Error>> {
@@ -41,7 +40,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
         TracingLogControl1::new_auto(PrettyLogControl1LayerFactory, default_level)?;
     let subscriber = Registry::default().with(env_filter).with(control_layer);
     tracing::subscriber::set_global_default(subscriber).unwrap();
-    let _conn = ConnectionBuilder::session()?
+    let _conn = zbus::connection::Builder::session()?
         .name("de.swsnr.logcontrol.TracingServerExample")?
         .serve_log_control(logcontrol_zbus::LogControl1::new(control))?
         .build()

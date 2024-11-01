@@ -16,7 +16,6 @@
 use std::{error::Error, future::pending};
 
 use logcontrol::LogControl1;
-use zbus::ConnectionBuilder;
 
 struct DummyLogControl {
     level: logcontrol::LogLevel,
@@ -58,7 +57,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
         level: logcontrol::LogLevel::Info,
         target: logcontrol::KnownLogTarget::Console,
     };
-    let _conn = ConnectionBuilder::session()?
+    let _conn = zbus::connection::Builder::session()?
         .name("de.swsnr.logcontrol.SimpleServerExample")?
         .serve_at(
             logcontrol::DBUS_OBJ_PATH,

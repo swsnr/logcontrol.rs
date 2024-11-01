@@ -15,18 +15,25 @@ license.workspace = true
 categories.workspace = true
 
 [dependencies]
-tracing = { version = "0.1.37", default-features = false, features = ["attributes"] }
+tracing = { version = "0.1.37", default-features = false, features = [
+    "attributes",
+] }
 tracing-journald = { version = "0.3.0", default-features = false }
-tracing-subscriber = { version = "0.3.17", default-features = false, features = ["env-filter"] }
+tracing-subscriber = { version = "0.3.17", default-features = false, features = [
+    "env-filter",
+] }
 logcontrol = { version = "1.0.1", path = "../logcontrol" }
 
 [dev-dependencies]
 static_assertions = "1.1.0"
 tracing = { version = "0.1.37" }
-tracing-subscriber = { version = "0.3.17", default-features = false, features = ["ansi", "json"] }
+tracing-subscriber = { version = "0.3.17", default-features = false, features = [
+    "ansi",
+    "json",
+] }
 async-std = { version = "1.12.0", features = ["attributes"] }
-logcontrol-zbus = { path="../zbus" }
-zbus = "4.0.0"
+logcontrol-zbus = { path = "../zbus" }
+zbus = "5.0.1"
 
 [package.metadata.release]
 pre-release-replacements = [
