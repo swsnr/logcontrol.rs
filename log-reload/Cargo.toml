@@ -12,7 +12,7 @@ license.workspace = true
 categories.workspace = true
 
 [dependencies]
-thiserror = "1.0.50"
+thiserror = "2.0.3"
 log = { version = "0.4.20", default-features = false, features = ["std"] }
 
 [dev-dependencies]
