@@ -1,8 +1,8 @@
 //! A [`logcontrol::LogControl1`] frontend with [`zbus`].
 //!
-//! [`LogControl1`] provides the DBus interface implementation.  It receives the
+//! [`LogControl1`] provides the D-Bus interface implementation.  It receives the
 //!  underlying [`logcontrol::LogControl1`] as sole argument and exposes it
-//! over DBus, as a standard zbus DBus interface:
+//! over D-Bus, as a standard zbus D-Bus interface:
 //!
 //! ```ignore
 //! use logcontrol_zbus::{LogControl1, ConnectionBuilderExt};
@@ -32,7 +32,7 @@
 //!
 //! Otherwise systemd will not be able to change the log level or target.
 
-#![deny(warnings, clippy::all)]
+#![deny(warnings, clippy::all, clippy::pedantic)]
 #![forbid(unsafe_code)]
 
 use logcontrol::{LogControl1Error, LogLevel};
@@ -42,6 +42,7 @@ pub use logcontrol;
 pub use logcontrol::DBUS_OBJ_PATH;
 
 fn to_fdo_error(error: LogControl1Error) -> zbus::fdo::Error {
+    #[allow(clippy::enum_glob_use)]
     use LogControl1Error::*;
     match error {
         UnsupportedLogLevel(_) | UnsupportedLogTarget(_) => {
@@ -67,7 +68,7 @@ impl<C> LogControl1<C>
 where
     C: logcontrol::LogControl1 + Send + Sync + 'static,
 {
-    /// Create a new DBus interface around the given log control interface.
+    /// Create a new D-Bus interface around the given log control interface.
     pub fn new(control: C) -> Self {
         Self { control }
     }
@@ -89,8 +90,8 @@ where
 
     /// Set the new log level.
     #[zbus(property)]
-    fn set_log_level(&mut self, level: String) -> zbus::fdo::Result<()> {
-        let level = LogLevel::try_from(level.as_str())
+    fn set_log_level(&mut self, level: &str) -> zbus::fdo::Result<()> {
+        let level = LogLevel::try_from(level)
             .map_err(|error| zbus::fdo::Error::InvalidArgs(error.to_string()))?;
         self.control.set_level(level).map_err(to_fdo_error)
     }
@@ -103,7 +104,7 @@ where
 
     /// Change the log target.
     #[zbus(property)]
-    async fn set_log_target(&mut self, target: String) -> zbus::fdo::Result<()> {
+    fn set_log_target(&mut self, target: String) -> zbus::fdo::Result<()> {
         self.control.set_target(target).map_err(to_fdo_error)
     }
 
@@ -117,6 +118,10 @@ where
 /// Extend `ConnectionBuilder` to serve log control interfaces.
 pub trait ConnectionBuilderExt {
     /// Serve the given log control interface on this connection builder.
+    ///
+    /// # Errors
+    ///
+    /// Return an error if registering the log control object failed.
     fn serve_log_control<C>(self, iface: LogControl1<C>) -> zbus::Result<Self>
     where
         Self: Sized,

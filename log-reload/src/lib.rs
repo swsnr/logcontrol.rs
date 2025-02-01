@@ -6,7 +6,7 @@
 //! This allows programs to dynamically change the log level or log target at
 //! runtime.
 
-#![deny(warnings, clippy::all, missing_docs)]
+#![deny(warnings, clippy::all, clippy::pedantic, missing_docs)]
 #![forbid(unsafe_code)]
 
 use std::sync::{Arc, RwLock, Weak};
@@ -67,7 +67,7 @@ impl<T: Log> log::Log for LevelFilter<T> {
     /// Forward a log `record` to the underlying logger if it passes the level filter.
     fn log(&self, record: &log::Record) {
         if self.level_passes(record.metadata()) {
-            self.logger.log(record)
+            self.logger.log(record);
         }
     }
 
@@ -95,6 +95,7 @@ impl<T> ReloadLog<T> {
     }
 
     /// Obtain a handle to reload or modify the inner logger.
+    #[must_use]
     pub fn handle(&self) -> ReloadHandle<T> {
         ReloadHandle {
             underlying: Arc::downgrade(&self.underlying),
@@ -109,9 +110,7 @@ impl<T: Log> Log for ReloadLog<T> {
     /// because we can't trust that the inner logger is valid if a panic occurred
     /// while it was modified, so we indicate that this logger shouldn't be used at all.
     fn enabled(&self, metadata: &log::Metadata) -> bool {
-        self.underlying
-            .read()
-            .map_or(false, |l| l.enabled(metadata))
+        self.underlying.read().is_ok_and(|l| l.enabled(metadata))
     }
 
     /// Log the given `record` with the inner logger.
@@ -167,6 +166,11 @@ impl<T> ReloadHandle<T> {
     /// Replace the inner logger.
     ///
     /// This replaces the inner logger of the referenced [`ReloadLog`] with the given `logger`.
+    ///
+    /// # Errors
+    ///
+    /// Return [`ReloadError::Gone`] if the target logger was dropped, and
+    /// [`ReloadError::Poisoned`] if the reload lock is poisoned.
     pub fn replace(&self, logger: T) -> Result<(), ReloadError> {
         let lock = self.underlying.upgrade().ok_or(ReloadError::Gone)?;
         // TODO: Overwrite and clear poison, once clear_poison() is stabilized
@@ -183,6 +187,10 @@ impl<T> ReloadHandle<T> {
     /// until `f` returns.
     ///
     /// If `f` panics this lock gets poisoned which effectively disables the logger.
+    ///
+    /// # Errors
+    ///
+    /// Return [`ReloadError::Poisoned`] if the reload lock is poisoned.
     pub fn modify<F>(&self, f: F) -> Result<(), ReloadError>
     where
         F: FnOnce(&mut T),

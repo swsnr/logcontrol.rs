@@ -14,7 +14,7 @@
 //!
 //! See [`LogController::install_auto`] for the recommended entry point to this crate.
 
-#![deny(warnings, clippy::all, missing_docs)]
+#![deny(warnings, clippy::all, clippy::pedantic, missing_docs)]
 #![forbid(unsafe_code)]
 
 use log::Log;
@@ -52,8 +52,7 @@ fn from_known_log_target(
 ) -> Result<SupportedLogTarget, LogControl1Error> {
     match target {
         KnownLogTarget::Auto if connected_to_journal => Ok(SupportedLogTarget::Journal),
-        KnownLogTarget::Auto => Ok(SupportedLogTarget::Console),
-        KnownLogTarget::Console => Ok(SupportedLogTarget::Console),
+        KnownLogTarget::Auto | KnownLogTarget::Console => Ok(SupportedLogTarget::Console),
         KnownLogTarget::Journal => Ok(SupportedLogTarget::Journal),
         other => Err(LogControl1Error::UnsupportedLogTarget(
             other.as_str().to_string(),
@@ -65,6 +64,11 @@ fn from_known_log_target(
 ///
 /// Return an error if the systemd log level is not supported, i.e. does not map to a
 /// corresponding [`log::Level`].
+///
+/// # Errors
+///
+/// Return [`LogControl1Error::UnsupportedLogLevel`] if the log `level` from the
+/// logcontrol interface does not map to a [`log::Level`].
 pub fn from_log_level(level: LogLevel) -> Result<log::Level, LogControl1Error> {
     match level {
         LogLevel::Err => Ok(log::Level::Error),
@@ -101,6 +105,10 @@ fn create_logger<F: LogFactory>(
 /// A factory for log implementations.
 pub trait LogFactory {
     /// Create a logger for the console log target.
+    ///
+    /// # Errors
+    ///
+    /// Return an error if creating the logger failed.
     fn create_console_log(&self) -> Result<Box<dyn Log>, LogControl1Error>;
 
     /// Create a logger for journal log target.
@@ -108,6 +116,10 @@ pub trait LogFactory {
     /// The implementation should use `syslog_identifier` for the corresponding journal field.
     ///
     /// The default implementation creates a [`systemd_journal_logger::JournalLog`].
+    ///
+    /// # Errors
+    ///
+    /// Return [`LogControl1Error::InputOutputError`] if journald is unavailable.
     fn create_journal_log(
         &self,
         syslog_identifier: String,
@@ -168,9 +180,14 @@ impl<F: LogFactory> LogController<F> {
     /// for use as `SYSLOG_IDENTIFIER` journal field.
     ///
     /// Returns an error if `target` is not supported, of if creating a layer fails,
-    /// e.g. when selecting [`KnownLogTarget::Journal`] on a system where journald is
-    /// not running, or inside a container which has no direct access to the journald
-    /// socket.
+    ///
+    /// # Errors
+    ///
+    /// Return a [`LogControl1Error::UnsupportedLogTarget`] if `target` is
+    /// not supported, and [`LogControl1Error::InputOutputError`] if creating
+    /// the logger for `target` failed, e.g. when selecting [`KnownLogTarget::Journal`]
+    /// on a system where journald is not running, or inside a container which
+    /// has no direct access to the journald socket.
     pub fn new(
         factory: F,
         connected_to_journal: bool,
@@ -200,6 +217,12 @@ impl<F: LogFactory> LogController<F> {
     ///
     /// `level` denotes the initial level; for `factory` and returned errors,
     ///  see [`Self::new`].
+    ///
+    /// # Errors
+    ///
+    /// Return [`LogControl1Error::InputOutputError`] if journald is not
+    /// available, but should have been.  This will only happen on a broken
+    /// system.
     pub fn new_auto(
         factory: F,
         level: log::Level,
@@ -216,8 +239,12 @@ impl<F: LogFactory> LogController<F> {
     /**
      * Create and install a controlled logger, with automatic defaults.
      *
-     * See [`Self::new_auto`] for arguments and errors. Additionally, this function
-     * fails with [`LogControl1Error::Failure`] if [`log::set_boxed_logger`] fails.
+     * See [`Self::new_auto`] for arguments.
+     *
+     * # Errors
+     *
+     * See [`Self::new_auto`] for errors. Additionally, this function fails with
+     * [`LogControl1Error::Failure`] if [`log::set_boxed_logger`] fails.
      */
     pub fn install_auto(factory: F, level: log::Level) -> Result<Self, LogControl1Error> {
         let (control, logger) = Self::new_auto(factory, level)?;

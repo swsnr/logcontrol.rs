@@ -3,10 +3,10 @@
 //! ## The log control interface
 //!
 //! The log control interface exposes the basic log settings of a service over a
-//! specified DBus interface under a fixed DBus object path.  If a systemd
-//! service then defines a fixed DBus name in its unit file, via the `BusName`
+//! specified D-Bus interface under a fixed D-Bus object path.  If a systemd
+//! service then defines a fixed D-Bus name in its unit file, via the `BusName`
 //! property in the `Service` section, `systemctl` can query and update the
-//! logging settings over DBus.
+//! logging settings over D-Bus.
 //!
 //! For instance, `systemd-resolved.service` specifies a bus name in its unit
 //! file:
@@ -48,7 +48,7 @@
 //!
 //! To expose an implementation of the log control interface use the methods of
 //! the [`LogControl1`] trait to call the corresponding log control methods in
-//! the DBus callbacks.
+//! the D-Bus callbacks.
 //!
 //! In addition to this core trait and related types, this crate also provides
 //! some concrete helper functions to implement aspects of the log control
@@ -64,7 +64,7 @@
 //! should default to logging to the [`KnownLogTarget::Journal`] log target.
 //! This function also helps to implement the [`KnownLogTarget::Auto`] target.
 //!
-//! ## Logging framework implementations and DBus frontends
+//! ## Logging framework implementations and D-Bus frontends
 //!
 //! The following crates provides implementations of the [`LogControl1`] trait
 //! for a certain logging framework:
@@ -73,15 +73,21 @@
 //!   the log control interface on top of the [`tracing`](https://doc.rs/tracing)
 //!   crate.
 //!
-//! These crates implement DBus frontends to actually expose an implementation
-//! of the [`LogControl1`] trait over DBus:
+//! These crates implement D-Bus frontends to actually expose an implementation
+//! of the [`LogControl1`] trait over D-Bus:
 //!
 //! - [`logcontrol-zbus`](https://docs.rs/logcontrol-zbus) glues a [`LogControl1`]
-//!   into the pure Rust DBus implementation [`zbus`](https://docs.rs/zbus).
+//!   into the pure Rust D-Bus implementation [`zbus`](https://docs.rs/zbus).
 //!
 //! [logcontrol]: https://www.freedesktop.org/software/systemd/man/org.freedesktop.LogControl1.html
 
-#![deny(warnings, clippy::all, missing_docs, missing_debug_implementations)]
+#![deny(
+    warnings,
+    clippy::all,
+    clippy::pedantic,
+    missing_docs,
+    missing_debug_implementations
+)]
 #![forbid(unsafe_code)]
 
 use std::fmt::{Display, Formatter};
@@ -207,6 +213,7 @@ pub enum KnownLogTarget {
 
 impl KnownLogTarget {
     /// Convert to the corresponding string representation.
+    #[must_use]
     pub fn as_str(self) -> &'static str {
         match self {
             KnownLogTarget::Console => "console",
@@ -271,7 +278,7 @@ pub enum LogControl1Error {
 
 /// Abstract representation of the [LogControl1] interface.
 ///
-/// Bridges a DBus frontend to a backend logging framework.
+/// Bridges a D-Bus frontend to a backend logging framework.
 ///
 /// Implementations should choose the initial log target automatically, according
 /// to whether their stderr is already connected to the systemd journal directly,
@@ -284,6 +291,11 @@ pub trait LogControl1 {
     fn level(&self) -> LogLevel;
 
     /// Set the level of the underlying log framework.
+    ///
+    /// # Errors
+    ///
+    /// Return an error if the `level` is not supported, or if changing the level
+    /// fails.
     fn set_level(&mut self, level: LogLevel) -> Result<(), LogControl1Error>;
 
     /// Get the currently configured log target.
@@ -301,13 +313,18 @@ pub trait LogControl1 {
     ///
     /// It's a good idea though to support at least [`KnownLogTarget::Console`]
     /// and [`KnownLogTarget::Journal`].
+    ///
+    /// # Errors
+    ///
+    /// Return an error if the target is not supported, or if switching to the
+    /// target failed.
     fn set_target<S: AsRef<str>>(&mut self, target: S) -> Result<(), LogControl1Error>;
 
     /// Get the syslog identifier.
     fn syslog_identifier(&self) -> &str;
 }
 
-/// The DBus object path a log control interface needs to be served on for systemd to find it.
+/// The D-Bus object path a log control interface needs to be served on for systemd to find it.
 ///
 /// The path is `/org/freedesktop/LogControl1`, as required by the interface specification.
 pub static DBUS_OBJ_PATH: &str = "/org/freedesktop/LogControl1";
@@ -319,6 +336,7 @@ pub static DBUS_OBJ_PATH: &str = "/org/freedesktop/LogControl1";
 /// Return `true` if the device and inode numbers of the [`std::io::stderr`]
 /// file descriptor match the value of `$JOURNAL_STREAM` (see `systemd.exec(5)`).
 /// Otherwise, return `false`.
+#[must_use]
 pub fn stderr_connected_to_journal() -> bool {
     std::io::stderr()
         .as_fd()
@@ -343,6 +361,7 @@ pub fn stderr_connected_to_journal() -> bool {
 ///
 /// If it fails to determine the syslog identifier, i.e. when `current_exe`
 /// returns an error, this function falls back to the empty string.
+#[must_use]
 pub fn syslog_identifier() -> String {
     std::env::current_exe()
         .ok()

@@ -31,7 +31,7 @@
 //! // Then register `control` over DBus, e.g. via `logcontrol_zbus::LogControl1`.
 //! ```
 
-#![deny(warnings, clippy::all, missing_docs)]
+#![deny(warnings, clippy::all, clippy::pedantic, missing_docs)]
 #![forbid(unsafe_code)]
 
 use logcontrol::{KnownLogTarget, LogControl1, LogControl1Error, LogLevel};
@@ -68,8 +68,7 @@ fn from_known_log_target(
 ) -> Result<TracingLogTarget, LogControl1Error> {
     match target {
         KnownLogTarget::Auto if connected_to_journal => Ok(TracingLogTarget::Journal),
-        KnownLogTarget::Auto => Ok(TracingLogTarget::Console),
-        KnownLogTarget::Console => Ok(TracingLogTarget::Console),
+        KnownLogTarget::Auto | KnownLogTarget::Console => Ok(TracingLogTarget::Console),
         KnownLogTarget::Journal => Ok(TracingLogTarget::Journal),
         KnownLogTarget::Null => Ok(TracingLogTarget::Null),
         other => Err(LogControl1Error::UnsupportedLogTarget(
@@ -82,6 +81,11 @@ fn from_known_log_target(
 ///
 /// Return an error if the systemd log level is not supported, i.e. does not map to a
 /// corresponding [`tracing::Level`].
+///
+/// # Errors
+///
+/// Return [`LogControl1Error::UnsupportedLogLevel`] if `level` does not map to
+/// a [`tracing::Level`].
 pub fn from_log_level(level: LogLevel) -> Result<tracing::Level, LogControl1Error> {
     match level {
         LogLevel::Err => Ok(tracing::Level::ERROR),
@@ -115,12 +119,20 @@ pub trait LogControl1LayerFactory {
     ///
     /// The `syslog_identifier` should be send to the journal as `SYSLOG_IDENTIFIER`, to support `journalctl -t`.
     /// See [`systemd.journal-fields(7)`](https://www.freedesktop.org/software/systemd/man/systemd.journal-fields.html).
+    ///
+    /// # Errors
+    ///
+    /// Return an error if creating the journal layer failed.
     fn create_journal_layer<S: Subscriber + for<'span> LookupSpan<'span>>(
         &self,
         syslog_identifier: String,
     ) -> Result<Self::JournalLayer<S>, LogControl1Error>;
 
     /// Create a layer to use when [`KnownLogTarget::Console`] is selected.
+    ///
+    /// # Errors
+    ///
+    /// Return an error if creating the console layer failed.
     fn create_console_layer<S: Subscriber + for<'span> LookupSpan<'span>>(
         &self,
     ) -> Result<Self::ConsoleLayer<S>, LogControl1Error>;
@@ -253,7 +265,9 @@ where
     /// `syslog_identifier` is passed to [`LogControl1LayerFactory::create_journal_layer`]
     /// for use as `SYSLOG_IDENTIFIER` journal field.
     ///
-    /// Returns an error if `target` is not supported, of if creating a layer fails,
+    /// # Errors
+    ///
+    /// Return an error if `target` is not supported, of if creating a layer fails,
     /// e.g. when selecting [`KnownLogTarget::Journal`] on a system where journald is
     /// not running, or inside a container which has no direct access to the journald
     /// socket.
@@ -291,8 +305,11 @@ where
     /// determine the initial log target automatically according to
     /// [`logcontrol::stderr_connected_to_journal()`].
     ///
-    /// `level` denotes the initial level; for `factory` and returned errors,
-    ///  see [`Self::new`].
+    /// `level` denotes the initial level; see [`Self::new`] for `factory`.
+    ///
+    /// # Errors
+    ///
+    /// See [`Self::new`].
     pub fn new_auto(
         factory: F,
         level: tracing::Level,
