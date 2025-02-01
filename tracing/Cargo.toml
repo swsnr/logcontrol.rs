@@ -21,6 +21,8 @@ tracing = { version = "0.1.37", default-features = false, features = [
 tracing-journald = { version = "0.3.0", default-features = false }
 tracing-subscriber = { version = "0.3.17", default-features = false, features = [
     "env-filter",
+    "fmt",
+    "ansi",
 ] }
 logcontrol = { version = "1.0.1", path = "../logcontrol" }
 
