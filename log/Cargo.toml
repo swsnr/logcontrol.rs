@@ -16,7 +16,7 @@ categories.workspace = true
 
 [dependencies]
 logcontrol = { version = "1.0.2", path = "../logcontrol" }
-log-reload = { version = "0.1.0", path = "../log-reload" }
+log-reload = { version = "0.1.1", path = "../log-reload" }
 log = "0.4.20"
 systemd-journal-logger = "2.0.0"
 

@@ -1,7 +1,7 @@
 [package]
 name = "log-reload"
 description = "Dynamically reload log loggers"
-version = "0.1.0"
+version = "0.1.1"
 documentation = "https://docs.rs/log-reload"
 authors = ["Sebastian Wiesner <sebastian@swsnr.de>"]
 homepage.workspace = true
