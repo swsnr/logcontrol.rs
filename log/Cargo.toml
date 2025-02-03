@@ -1,6 +1,6 @@
 [package]
 name = "logcontrol-log"
-version = "0.1.0"
+version = "0.1.1"
 description = "log backend for the log control interface"
 documentation = "https://docs.rs/logcontrol-log"
 readme = "README.md"
