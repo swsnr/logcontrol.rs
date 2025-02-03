@@ -22,3 +22,5 @@ tag-message = "{{crate_name}} {{version}}"
 tag-prefix = "{{crate_name}}-"
 # That's what we have github actions for
 verify = false
+# We have a release workflow for this
+publish = false
