@@ -2,8 +2,7 @@ name: Release
 
 on:
   push:
-    # TODO: All relevant subcrate tags
-    tags: v*
+    tags: "*-v*"
 
 permissions: read-all
 
@@ -11,7 +10,6 @@ jobs:
   publish:
     runs-on: ubuntu-latest
     env:
-      # TODO create token in crates.io and add it as secret
       CARGO_REGISTRY_TOKEN: '${{ secrets.CARGO_REGISTRY_TOKEN }}'
     steps:
       - uses: actions/checkout@v4
