@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.0.2] – 2025-02-03
+
 ### Changed
 - Add `must_use` to some functions.
 
@@ -30,6 +32,7 @@ Initial release.
     - `stderr_connected_to_journal`
     - `syslog_identifier`
 
-[Unreleased]: https://github.com/swsnr/logcontrol.rs/compare/logcontrol-v1.0.1...HEAD
+[Unreleased]: https://github.com/swsnr/logcontrol.rs/compare/logcontrol-v1.0.2...HEAD
+[1.0.2]: https://github.com/swsnr/logcontrol.rs/compare/logcontrol-v1.0.1...logcontrol-v1.0.2
 [1.0.1]: https://github.com/swsnr/logcontrol.rs/compare/logcontrol-v1.0.0...logcontrol-v1.0.1
 [1.0.0]: https://github.com/swsnr/logcontrol.rs/releases/tag/logcontrol-v1.0.0
