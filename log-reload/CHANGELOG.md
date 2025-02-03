@@ -7,6 +7,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+- `ReloadHandle::replace` now clears lock poison if any.
+
 ### Changed
 - Bump MSRV to 1.77.
 

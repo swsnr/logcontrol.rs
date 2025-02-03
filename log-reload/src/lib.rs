@@ -140,16 +140,9 @@ pub enum ReloadError {
     Gone,
     /// The lock protecting the inner logger referenced by the reload is poisoned.
     ///
-    /// Note that this is an error because we currently can't recover from a
-    /// poisoned [`RwLock`] in stable rust, as [`RwLock::clear_poison`] is still
-    /// experimental.
-    ///
-    /// Once this method stabilizes reloading can simply overwrite any poisoned
-    /// data and clear the poison flag to resume logging.  At this point this
-    /// error condition will be removed.
-    ///
-    /// See <https://github.com/rust-lang/rust/issues/96469> for stabilization of
-    /// [`RwLock::clear_poison`].
+    /// [`ReloadHandle::modify`] will return this error if the lock is poisoned;
+    /// use [`ReloadHandle::replace`] to overwrite the logger and clear the
+    /// poison.
     Poisoned,
 }
 
@@ -173,17 +166,21 @@ pub struct ReloadHandle<T> {
 impl<T> ReloadHandle<T> {
     /// Replace the inner logger.
     ///
-    /// This replaces the inner logger of the referenced [`ReloadLog`] with the given `logger`.
+    /// This replaces the inner logger of the referenced [`ReloadLog`] with the
+    /// given `logger`, and clears any existing poison from the lock for the
+    /// inner logger.
     ///
     /// # Errors
     ///
-    /// Return [`ReloadError::Gone`] if the target logger was dropped, and
-    /// [`ReloadError::Poisoned`] if the reload lock is poisoned.
+    /// Return [`ReloadError::Gone`] if the logger referenced by this reload
+    /// handle was dropped, and can no longer be reloaded.
     pub fn replace(&self, logger: T) -> Result<(), ReloadError> {
         let lock = self.underlying.upgrade().ok_or(ReloadError::Gone)?;
-        // TODO: Overwrite and clear poison, once clear_poison() is stabilized
-        // See https://github.com/rust-lang/rust/issues/96469
-        let mut guard = lock.write().map_err(|_| ReloadError::Poisoned)?;
+        let mut guard = lock.write().unwrap_or_else(|error| {
+            // We'll overwrite the logger immediately, so we can safely clear the poison flag.
+            lock.clear_poison();
+            error.into_inner()
+        });
         *guard = logger;
         Ok(())
     }
@@ -198,14 +195,17 @@ impl<T> ReloadHandle<T> {
     ///
     /// # Errors
     ///
+    /// Return [`ReloadError::Gone`] if the logger referenced by this reload
+    /// handle was dropped, and can no longer be reloaded.
+    ///
     /// Return [`ReloadError::Poisoned`] if the reload lock is poisoned.
     pub fn modify<F>(&self, f: F) -> Result<(), ReloadError>
     where
         F: FnOnce(&mut T),
     {
         let lock = self.underlying.upgrade().ok_or(ReloadError::Gone)?;
-        // TODO: Overwrite and clear poison, once clear_poison() is stabilized
-        // See https://github.com/rust-lang/rust/issues/96469
+        // We can't clear poison here has we don't know whether `f` will force
+        // the logger into a consistent state after a previous panic.
         let mut guard = lock.write().map_err(|_| ReloadError::Poisoned)?;
         f(&mut *guard);
         Ok(())
