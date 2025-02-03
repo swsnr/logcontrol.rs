@@ -12,7 +12,6 @@
 use std::sync::{Arc, RwLock, Weak};
 
 use log::Log;
-use thiserror::Error;
 
 /// Filter an underlying logger by a given max level.
 ///
@@ -135,10 +134,9 @@ impl<T: Log> Log for ReloadLog<T> {
 }
 
 /// An error which occurred while reloading the logger.
-#[derive(Debug, Clone, Copy, Error)]
+#[derive(Debug, Clone, Copy)]
 pub enum ReloadError {
     /// The logger referenced by the reload handle was dropped meanwhile.
-    #[error("Referenced logger was dropped")]
     Gone,
     /// The lock protecting the inner logger referenced by the reload is poisoned.
     ///
@@ -152,9 +150,19 @@ pub enum ReloadError {
     ///
     /// See <https://github.com/rust-lang/rust/issues/96469> for stabilization of
     /// [`RwLock::clear_poison`].
-    #[error("Lock poisoned")]
     Poisoned,
 }
+
+impl std::fmt::Display for ReloadError {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            ReloadError::Gone => write!(f, "Referenced logger was dropped"),
+            ReloadError::Poisoned => write!(f, "Lock poisoned"),
+        }
+    }
+}
+
+impl std::error::Error for ReloadError {}
 
 /// A handle to reload a logger inside a [`ReloadLog`].
 #[derive(Debug, Clone)]

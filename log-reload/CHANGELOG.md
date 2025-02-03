@@ -10,6 +10,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 - `LogReload::handle` has a `must_use` attribute now.
 
+### Removed
+- Drop `thiserror` dependency.
+
 ## [0.1.0] – 2023-10-26
 
 ### Added

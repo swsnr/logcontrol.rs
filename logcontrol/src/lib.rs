@@ -93,8 +93,6 @@
 use std::fmt::{Display, Formatter};
 use std::os::{fd::AsFd, linux::fs::MetadataExt};
 
-use thiserror::Error;
-
 /// A syslog log level as used by the systemd log control interface.
 ///
 /// See [POSIX syslog](https://pubs.opengroup.org/onlinepubs/9699919799.2018edition/functions/syslog.html)
@@ -120,9 +118,16 @@ pub enum LogLevel {
 }
 
 /// The log level was invalid.
-#[derive(Debug, Copy, Clone, Error)]
-#[error("Invalid log level")]
+#[derive(Debug, Copy, Clone)]
 pub struct LogLevelParseError;
+
+impl Display for LogLevelParseError {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+        write!(f, "Invalid log level")
+    }
+}
+
+impl std::error::Error for LogLevelParseError {}
 
 impl TryFrom<&str> for LogLevel {
     type Error = LogLevelParseError;
@@ -227,9 +232,16 @@ impl KnownLogTarget {
 }
 
 /// The log target was invalid.
-#[derive(Debug, Clone, Error)]
-#[error("Invalid log target: '{0}'")]
+#[derive(Debug, Clone)]
 pub struct LogTargetParseError(String);
+
+impl Display for LogTargetParseError {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+        write!(f, "Invalid log target: '{}'", self.0)
+    }
+}
+
+impl std::error::Error for LogTargetParseError {}
 
 impl From<LogTargetParseError> for LogControl1Error {
     fn from(value: LogTargetParseError) -> Self {
@@ -260,20 +272,46 @@ impl Display for KnownLogTarget {
 }
 
 /// An error in a [`LogControl1`] operation.
-#[derive(Debug, Error)]
+#[derive(Debug)]
 pub enum LogControl1Error {
     /// A log level is not supported by the underlying log framework.
-    #[error("The log level {0} is not supported")]
     UnsupportedLogLevel(LogLevel),
     /// A log target is not supported by the underlying log framework.
-    #[error("The log target {0} is not supported")]
     UnsupportedLogTarget(String),
     /// An IO error occurred while changing log target or log level.
-    #[error(transparent)]
-    InputOutputError(#[from] std::io::Error),
+    InputOutputError(std::io::Error),
     /// A generic failure while changing log target or log level.
-    #[error("{0}")]
     Failure(String),
+}
+
+impl Display for LogControl1Error {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+        match self {
+            LogControl1Error::UnsupportedLogLevel(log_level) => {
+                write!(f, "The log level {log_level} is not supported")
+            }
+            LogControl1Error::UnsupportedLogTarget(target) => {
+                write!(f, "The log target {target} is not supported")
+            }
+            LogControl1Error::InputOutputError(error) => error.fmt(f),
+            LogControl1Error::Failure(message) => message.fmt(f),
+        }
+    }
+}
+
+impl std::error::Error for LogControl1Error {
+    fn source(&self) -> Option<&(dyn std::error::Error + 'static)> {
+        match self {
+            LogControl1Error::InputOutputError(error) => Some(error),
+            _ => None,
+        }
+    }
+}
+
+impl From<std::io::Error> for LogControl1Error {
+    fn from(error: std::io::Error) -> Self {
+        Self::InputOutputError(error)
+    }
 }
 
 /// Abstract representation of the [LogControl1] interface.

@@ -15,7 +15,6 @@ license.workspace = true
 categories.workspace = true
 
 [dependencies]
-thiserror = "2.0.3"
 
 [package.metadata.release]
 pre-release-replacements = [
