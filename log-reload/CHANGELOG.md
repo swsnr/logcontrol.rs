@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.1.2] – 2025-02-04
+
 ### Added
 - `ReloadHandle::replace` now clears lock poison if any.
 
@@ -27,6 +29,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Add `log_reload::LevelFilter`.
 - Add `log_reload::ReloadLog`.
 
-[Unreleased]: https://github.com/swsnr/logcontrol.rs/compare/log-reload-v0.1.1...HEAD
+[Unreleased]: https://github.com/swsnr/logcontrol.rs/compare/log-reload-v0.1.2...HEAD
+[0.1.2]: https://github.com/swsnr/logcontrol.rs/compare/log-reload-v0.1.1...log-reload-v0.1.2
 [0.1.1]: https://github.com/swsnr/logcontrol.rs/compare/log-reload-v0.1.0...log-reload-v0.1.1
 [0.1.0]: https://github.com/swsnr/logcontrol.rs/releases/tag/log-reload-v0.1.0
