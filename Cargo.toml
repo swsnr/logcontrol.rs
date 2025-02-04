@@ -24,3 +24,6 @@ tag-prefix = "{{crate_name}}-"
 verify = false
 # We have a release workflow for this
 publish = false
+# Let's push commit and tag manually, and separately, to have the commit pipeline
+# pass before pushing the tag
+push = false
