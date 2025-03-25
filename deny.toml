@@ -20,6 +20,7 @@ skip = [
     # tracing-subscriber depends on these older versions too, in some paths
     { name = "regex-automata", version = "0.1.10" },
     { name = "regex-syntax", version = "0.6.29" },
-    # zbus depends on an older version of winnow 0.6
-    { name = "winnow", version = "0.6.26" },
+    # Old releases of rustix; 1.x still needs to tickle down the ecosystem
+    { name = "rustix", version = "0.38.4" },
+    { name = "linux-raw-sys", version = "0.4.15" },
 ]
