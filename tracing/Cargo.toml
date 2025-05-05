@@ -24,7 +24,7 @@ tracing-subscriber = { version = "0.3.17", default-features = false, features = 
     "fmt",
     "ansi",
 ] }
-logcontrol = { version = "1.0.2", path = "../logcontrol" }
+logcontrol = { version = "1.0.3", path = "../logcontrol" }
 
 [dev-dependencies]
 static_assertions = "1.1.0"

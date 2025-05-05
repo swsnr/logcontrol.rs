@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.0.3] – 2025-05-05
+
 ### Changed
 - Bump MSRV to 1.77.
 
@@ -35,7 +37,8 @@ Initial release.
     - `stderr_connected_to_journal`
     - `syslog_identifier`
 
-[Unreleased]: https://codeberg.org/swsnr/logcontrol.rs/compare/logcontrol-v1.0.2...HEAD
+[Unreleased]: https://codeberg.org/swsnr/logcontrol.rs/compare/logcontrol-v1.0.3...HEAD
+[1.0.3]: https://codeberg.org/swsnr/logcontrol.rs/compare/logcontrol-v1.0.2...logcontrol-v1.0.3
 [1.0.2]: https://codeberg.org/swsnr/logcontrol.rs/compare/logcontrol-v1.0.1...logcontrol-v1.0.2
 [1.0.1]: https://codeberg.org/swsnr/logcontrol.rs/compare/logcontrol-v1.0.0...logcontrol-v1.0.1
 [1.0.0]: https://codeberg.org/swsnr/logcontrol.rs/releases/tag/logcontrol-v1.0.0
