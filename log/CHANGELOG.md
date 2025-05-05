@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.1.2] – 2025-05-05
+
 ### Changed
 - Bump MSRV to 1.77.
 
@@ -21,6 +23,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - `logcontrol_log::LogController` and `logcontrol_log::LogFactory`.
 
-[Unreleased]: https://codeberg.org/swsnr/logcontrol.rs/compare/logcontrol-log-v0.1.1...HEAD
+[Unreleased]: https://codeberg.org/swsnr/logcontrol.rs/compare/logcontrol-log-v0.1.2...HEAD
+[0.1.2]: https://codeberg.org/swsnr/logcontrol.rs/compare/logcontrol-log-v0.1.1...logcontrol-log-v0.1.2
 [0.1.1]: https://codeberg.org/swsnr/logcontrol.rs/compare/logcontrol-log-v0.1.0...logcontrol-log-v0.1.1
 [0.1.0]: https://codeberg.org/swsnr/logcontrol.rs/releases/tag/logcontrol-log-v0.1.0

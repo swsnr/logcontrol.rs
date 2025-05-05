@@ -643,7 +643,7 @@ version = "1.0.3"
 
 [[package]]
 name = "logcontrol-log"
-version = "0.1.1"
+version = "0.1.2"
 dependencies = [
  "async-std",
  "env_logger",
