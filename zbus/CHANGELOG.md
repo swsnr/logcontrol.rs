@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [3.0.2] – 2025-05-05
+
 ### Changed
 - Bump MSRV to 1.77.
 
@@ -41,7 +43,8 @@ Initial release.
 
 - Add DBus interface implementation `LogControl1`.
 
-[Unreleased]: https://codeberg.org/swsnr/logcontrol.rs/compare/logcontrol-zbus-v3.0.1...HEAD
+[Unreleased]: https://codeberg.org/swsnr/logcontrol.rs/compare/logcontrol-zbus-v3.0.2...HEAD
+[3.0.2]: https://codeberg.org/swsnr/logcontrol.rs/compare/logcontrol-zbus-v3.0.1...logcontrol-zbus-v3.0.2
 [3.0.1]: https://codeberg.org/swsnr/logcontrol.rs/compare/logcontrol-zbus-v3.0.0...logcontrol-zbus-v3.0.1
 [3.0.0]: https://codeberg.org/swsnr/logcontrol.rs/compare/logcontrol-zbus-v2.0.0...logcontrol-zbus-v3.0.0
 [2.0.0]: https://codeberg.org/swsnr/logcontrol.rs/compare/logcontrol-zbus-v1.1.0...logcontrol-zbus-v2.0.0

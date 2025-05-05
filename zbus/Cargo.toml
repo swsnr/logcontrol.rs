@@ -1,7 +1,7 @@
 [package]
 name = "logcontrol-zbus"
 description = "zbus-based DBus frontend for the logcontrol interface"
-version = "3.0.1"
+version = "3.0.2"
 documentation = "https://docs.rs/logcontrol-zbus"
 authors = ["Sebastian Wiesner <sebastian@swsnr.de>"]
 keywords = ["systemd", "log", "zbus", "dbus"]
