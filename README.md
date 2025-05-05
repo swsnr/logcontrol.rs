@@ -10,9 +10,9 @@ This interface provides means to change logging behaviour of system services at 
 This repository provides a collection of traits of basic types and implementations of this interface:
 
 - `logcontrol` contains the basic types and defines an abstract trait for the interface.
-- [`logcontrol-tracing`](https://github.com/swsnr/logcontrol.rs/tree/main/tracing) provides a logcontrol backend implementation for the [`tracing`][tracing] library.
-- [`logcontrol-log`](https://github.com/swsnr/logcontrol.rs/tree/main/log) provides a logcontrol backend implementation for the [`log`][log] library.
-- [`logcontrol-zbus`](https://github.com/swsnr/logcontrol.rs/tree/main/zbus) provides a DBus interface implementation for [`zbus`][zbus] DBus framework.
+- [`logcontrol-tracing`](https://codeberg.org/swsnr/logcontrol.rs/src/branch/main/tracing) provides a logcontrol backend implementation for the [`tracing`][tracing] library.
+- [`logcontrol-log`](https://codeberg.org/swsnr/logcontrol.rs/src/branch/main/log) provides a logcontrol backend implementation for the [`log`][log] library.
+- [`logcontrol-zbus`](https://codeberg.org/swsnr/logcontrol.rs/src/branch/main/zbus) provides a DBus interface implementation for [`zbus`][zbus] DBus framework.
 
 [logcontrol]: https://www.freedesktop.org/software/systemd/man/org.freedesktop.LogControl1.html#
 [tracing]: https://github.com/tokio-rs/tracing
@@ -57,5 +57,3 @@ async fn main() -> Result<(), Box<dyn Error>> {
     }
 }
 ```
-
-See [tracing-server.rs](https://github.com/swsnr/logcontrol.rs/blob/main/zbus/examples/tracing-server.rs) for a more complete example.

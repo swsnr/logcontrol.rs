@@ -3,8 +3,8 @@ members = ["logcontrol", "tracing", "log", "log-reload", "zbus"]
 resolver = "2"
 
 [workspace.package]
-homepage = "https://github.com/swsnr/logcontrol.rs"
-repository = "https://github.com/swsnr/logcontrol.rs.git"
+homepage = "https://codeberg.org/swsnr/logcontrol.rs"
+repository = "https://codeberg.org/swsnr/logcontrol.rs.git"
 edition = "2021"
 rust-version = "1.77"
 license = "MIT OR Apache-2.0"

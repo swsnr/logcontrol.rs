@@ -35,7 +35,7 @@ Initial release.
     - `stderr_connected_to_journal`
     - `syslog_identifier`
 
-[Unreleased]: https://github.com/swsnr/logcontrol.rs/compare/logcontrol-v1.0.2...HEAD
-[1.0.2]: https://github.com/swsnr/logcontrol.rs/compare/logcontrol-v1.0.1...logcontrol-v1.0.2
-[1.0.1]: https://github.com/swsnr/logcontrol.rs/compare/logcontrol-v1.0.0...logcontrol-v1.0.1
-[1.0.0]: https://github.com/swsnr/logcontrol.rs/releases/tag/logcontrol-v1.0.0
+[Unreleased]: https://codeberg.org/swsnr/logcontrol.rs/compare/logcontrol-v1.0.2...HEAD
+[1.0.2]: https://codeberg.org/swsnr/logcontrol.rs/compare/logcontrol-v1.0.1...logcontrol-v1.0.2
+[1.0.1]: https://codeberg.org/swsnr/logcontrol.rs/compare/logcontrol-v1.0.0...logcontrol-v1.0.1
+[1.0.0]: https://codeberg.org/swsnr/logcontrol.rs/releases/tag/logcontrol-v1.0.0

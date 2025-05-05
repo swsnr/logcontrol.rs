@@ -6,7 +6,7 @@
 [`log`][log] implementation for the [logcontrol] interface.
 
 [log]: https://github.com/rust-lang/log
-[logcontrol]: https://github.com/swsnr/logcontrol.rs
+[logcontrol]: https://codeberg.org/swsnr/logcontrol.rs
 
 ## Usage
 
