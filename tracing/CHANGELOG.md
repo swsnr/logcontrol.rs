@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.2.2] – 2025-05-05
+
 ### Changed
 - Bump MSRV to 1.77.
 
@@ -29,7 +31,8 @@ Initial release.
 - Factory types for layers: `LogControl1LayerFactory` and `PrettyLogControl1LayerFactory`.
 - Log control implementation: `TracingLogControl1`
 
-[Unreleased]: https://codeberg.org/swsnr/logcontrol.rs/compare/logcontrol-tracing-v0.2.1...HEAD
+[Unreleased]: https://codeberg.org/swsnr/logcontrol.rs/compare/logcontrol-tracing-v0.2.2...HEAD
+[0.2.2]: https://codeberg.org/swsnr/logcontrol.rs/compare/logcontrol-tracing-v0.2.1...logcontrol-tracing-v0.2.2
 [0.2.1]: https://codeberg.org/swsnr/logcontrol.rs/compare/logcontrol-tracing-v0.2.0...logcontrol-tracing-v0.2.1
 [0.2.0]: https://codeberg.org/swsnr/logcontrol.rs/compare/logcontrol-tracing-v0.1.0...logcontrol-tracing-v0.2.0
 [0.1.0]: https://codeberg.org/swsnr/logcontrol.rs/releases/tag/logcontrol-zbus-v1.0.0
