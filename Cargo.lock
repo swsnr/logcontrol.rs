@@ -631,7 +631,7 @@ dependencies = [
 
 [[package]]
 name = "log-reload"
-version = "0.1.2"
+version = "0.1.3"
 dependencies = [
  "log",
  "similar-asserts",
