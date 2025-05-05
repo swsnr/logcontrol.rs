@@ -20,10 +20,3 @@ consolidate-commits = false
 pre-release-commit-message = "Release {{crate_name}} {{version}}"
 tag-message = "{{crate_name}} {{version}}"
 tag-prefix = "{{crate_name}}-"
-# That's what we have github actions for
-verify = false
-# We have a release workflow for this
-publish = false
-# Let's push commit and tag manually, and separately, to have the commit pipeline
-# pass before pushing the tag
-push = false
