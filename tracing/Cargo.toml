@@ -33,7 +33,6 @@ tracing-subscriber = { version = "0.3.17", default-features = false, features = 
     "ansi",
     "json",
 ] }
-async-std = { version = "1.12.0", features = ["attributes"] }
 logcontrol-zbus = { path = "../zbus" }
 zbus = "5.0.1"
 
