@@ -2,9 +2,9 @@ default:
     just --list
 
 test-all:
-    cargo deny --all-features --locked check
-    cargo fmt -- --check
-    cargo build --workspace --all-targets --locked
-    cargo clippy --workspace --all-targets --locked
-    cargo test --workspace --locked
-    cargo doc --workspace --locked
+    cargo +stable deny --all-features --locked check
+    cargo +stable fmt -- --check
+    cargo +stable build --workspace --all-targets --locked
+    cargo +stable clippy --workspace --all-targets --locked
+    cargo +stable test --workspace --locked
+    cargo +stable doc --workspace --locked
