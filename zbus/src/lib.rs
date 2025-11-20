@@ -58,7 +58,7 @@ fn to_fdo_error(error: LogControl1Error) -> zbus::fdo::Error {
 
 /// A [`zbus`] frontend for [`logcontrol::LogControl1`].
 ///
-/// See [crate documentation][`logcontrol-zbus`] for an example and further
+/// See [crate documentation][`crate`] for an example and further
 /// usage instructions.
 pub struct LogControl1<C>
 where
