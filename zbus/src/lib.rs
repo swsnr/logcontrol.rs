@@ -5,21 +5,24 @@
 //! over D-Bus, as a standard zbus D-Bus interface:
 //!
 //! ```ignore
+//! use async_io::block_on;
 //! use logcontrol_zbus::{LogControl1, ConnectionBuilderExt};
 //!
-//! #[async_std::main]
-//! async fn main() -> Result<(), Box<dyn std::error::Error>> {
+//! fn main() -> Result<(), Box<dyn std::error::Error>> {
 //!     let control = create_log_control();
-//!     let _conn = zbus::ConnectionBuilder::session()?
-//!         .name("de.swsnr.logcontrol.SimpleServerExample")?
-//!         .serve_log_control(LogControl1::new(control))?
-//!         .build()
-//!         .await?;
 //!
-//!     // Do other things or go to wait forever
-//!     std::future::pending::<()>().await;
+//!     block_on(async move {
+//!          let _conn = zbus::ConnectionBuilder::session()?
+//!              .name("de.swsnr.logcontrol.SimpleServerExample")?
+//!              .serve_log_control(LogControl1::new(control))?
+//!              .build()
+//!              .await?;
 //!
-//!     Ok(())
+//!          // Do other things or go to wait forever
+//!          std::future::pending::<()>().await;
+//!
+//!          Ok(())
+//!     })
 //! }
 //! ```
 //!

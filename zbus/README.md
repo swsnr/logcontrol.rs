@@ -14,22 +14,4 @@
 $ cargo add logcontrol-zbus
 ```
 
-```rust
-use logcontrol_zbus::ConnectionBuilderExt;
-
-#[async_std::main]
-async fn main() -> Result<(), Box<dyn std::error::Error>> {
-    // Use an implementation such as logcontrol-tracing
-    let control = create_log_control();
-    let _conn = zbus::ConnectionBuilder::session()?
-        .name("de.swsnr.logcontrol.SimpleServerExample")?
-        .serve_log_control(logcontrol_zbus::LogControl1::new(control))?
-        .build()
-        .await?;
-
-    // Do other things or go to wait forever
-    std::future::pending::<()>().await;
-
-    Ok(())
-}
-```
+See [logcontrol-zbus](https://docs.rs/logcontrol-zbus) for more information.

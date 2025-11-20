@@ -51,23 +51,25 @@ impl LogControl1 for DummyLogControl {
     }
 }
 
-#[async_std::main]
-async fn main() -> Result<(), Box<dyn Error>> {
+fn main() -> Result<(), Box<dyn Error>> {
     let control = DummyLogControl {
         level: logcontrol::LogLevel::Info,
         target: logcontrol::KnownLogTarget::Console,
     };
-    let _conn = zbus::connection::Builder::session()?
-        .name("de.swsnr.logcontrol.SimpleServerExample")?
-        .serve_at(
-            logcontrol::DBUS_OBJ_PATH,
-            logcontrol_zbus::LogControl1::new(control),
-        )?
-        .build()
-        .await?;
 
-    // Do other things or go to wait forever
-    pending::<()>().await;
+    async_io::block_on(async move {
+        let _conn = zbus::connection::Builder::session()?
+            .name("de.swsnr.logcontrol.SimpleServerExample")?
+            .serve_at(
+                logcontrol::DBUS_OBJ_PATH,
+                logcontrol_zbus::LogControl1::new(control),
+            )?
+            .build()
+            .await?;
 
-    Ok(())
+        // Do other things or go to wait forever
+        pending::<()>().await;
+
+        Ok(())
+    })
 }

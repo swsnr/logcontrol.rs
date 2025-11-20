@@ -535,6 +535,7 @@ version = "1.0.3"
 name = "logcontrol-log"
 version = "0.1.2"
 dependencies = [
+ "async-io",
  "env_logger",
  "log",
  "log-reload",
@@ -549,6 +550,7 @@ dependencies = [
 name = "logcontrol-tracing"
 version = "0.2.2"
 dependencies = [
+ "async-io",
  "logcontrol",
  "logcontrol-zbus",
  "static_assertions",
@@ -562,6 +564,7 @@ dependencies = [
 name = "logcontrol-zbus"
 version = "3.0.2"
 dependencies = [
+ "async-io",
  "logcontrol",
  "zbus",
 ]

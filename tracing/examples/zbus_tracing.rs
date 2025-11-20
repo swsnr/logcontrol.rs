@@ -25,8 +25,7 @@ use tracing::{event, Level};
 use tracing_subscriber::prelude::*;
 use tracing_subscriber::Registry;
 
-#[async_std::main]
-async fn main() -> Result<(), Box<dyn Error>> {
+fn main() -> Result<(), Box<dyn Error>> {
     // Setup env filter for convenient log control on console
     let env_filter = tracing_subscriber::EnvFilter::try_from_default_env().ok();
     // If an env filter is set with $RUST_LOG use the lowest level as default for the control part,
@@ -40,16 +39,19 @@ async fn main() -> Result<(), Box<dyn Error>> {
         TracingLogControl1::new_auto(PrettyLogControl1LayerFactory, default_level)?;
     let subscriber = Registry::default().with(env_filter).with(control_layer);
     tracing::subscriber::set_global_default(subscriber).unwrap();
-    let _conn = zbus::connection::Builder::session()?
-        .name("de.swsnr.logcontrol.TracingServerExample")?
-        .serve_log_control(logcontrol_zbus::LogControl1::new(control))?
-        .build()
-        .await?;
 
-    loop {
-        async_std::task::sleep(Duration::from_secs(5)).await;
-        event!(Level::INFO, "An message at info level");
-        async_std::task::sleep(Duration::from_secs(1)).await;
-        event!(Level::WARN, "An message at warning level");
-    }
+    async_io::block_on(async move {
+        let _conn = zbus::connection::Builder::session()?
+            .name("de.swsnr.logcontrol.TracingServerExample")?
+            .serve_log_control(logcontrol_zbus::LogControl1::new(control))?
+            .build()
+            .await?;
+
+        loop {
+            async_io::Timer::after(Duration::from_secs(5)).await;
+            event!(Level::INFO, "An message at info level");
+            async_io::Timer::after(Duration::from_secs(1)).await;
+            event!(Level::WARN, "An message at warning level");
+        }
+    })
 }

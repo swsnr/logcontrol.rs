@@ -26,34 +26,5 @@ $ cargo add logcontrol-tracing
 $ cargo add logcontrol-zbus
 ```
 
-```rust
-use std::error::Error;
-use std::time::Duration;
-
-use logcontrol_tracing::{PrettyLogControl1LayerFactory, TracingLogControl1};
-use logcontrol_zbus::{ConnectionBuilderExt, LogControl1};
-use tracing::{event, Level};
-use tracing_subscriber::prelude::*;
-use tracing_subscriber::Registry;
-use zbus::ConnectionBuilder;
-
-#[async_std::main]
-async fn main() -> Result<(), Box<dyn Error>> {
-    let (control, control_layer) =
-        TracingLogControl1::new_auto(PrettyLogControl1LayerFactory, Level::INFO)?;
-    let subscriber = Registry::default().with(control_layer);
-    tracing::subscriber::set_global_default(subscriber).unwrap();
-    let _conn = ConnectionBuilder::session()?
-        .name("com.example.Foo")?
-        .serve_log_control(LogControl1::new(control))?
-        .build()
-        .await?;
-
-    loop {
-        async_std::task::sleep(Duration::from_secs(5)).await;
-        event!(Level::INFO, "An message at info level");
-        async_std::task::sleep(Duration::from_secs(1)).await;
-        event!(Level::WARN, "An message at warning level");
-    }
-}
-```
+See [`tracing/examples/zbus_tracing.rs`](./tracing/examples/zbus_tracing.rs) for a complete example with [zbus] and [tracing],
+and [`log/examples/zbus_log.rs`](./log/examples/zbus_log.rs) for an example using the [log] crate.

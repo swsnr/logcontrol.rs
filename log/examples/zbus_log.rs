@@ -32,19 +32,22 @@ impl LogFactory for Factory {
     }
 }
 
-#[async_std::main]
-async fn main() -> Result<(), Box<dyn Error>> {
+fn main() -> Result<(), Box<dyn Error>> {
     let control = LogController::install_auto(Factory, log::Level::Info)?;
-    let _conn = zbus::connection::Builder::session()?
-        .name("de.swsnr.logcontrol.LogServerExample")?
-        .serve_log_control(logcontrol_zbus::LogControl1::new(control))?
-        .build()
-        .await?;
+    log::set_max_level(log::LevelFilter::Trace);
 
-    loop {
-        async_std::task::sleep(Duration::from_secs(5)).await;
-        info!("An message at info level");
-        async_std::task::sleep(Duration::from_secs(1)).await;
-        warn!("An message at warning level");
-    }
+    async_io::block_on(async move {
+        let _conn = zbus::connection::Builder::session()?
+            .name("de.swsnr.logcontrol.LogServerExample")?
+            .serve_log_control(logcontrol_zbus::LogControl1::new(control))?
+            .build()
+            .await?;
+
+        loop {
+            async_io::Timer::after(Duration::from_secs(5)).await;
+            info!("An message at info level");
+            async_io::Timer::after(Duration::from_secs(1)).await;
+            warn!("An message at warning level");
+        }
+    })
 }
